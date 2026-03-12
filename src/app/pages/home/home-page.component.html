@@ -1,10 +1,37 @@
 <main appMotionPage class="page-shell overflow-x-hidden" id="top">
-  <app-site-header [actions]="actions" [brand]="brand" [navItems]="navItems"></app-site-header>
-  <app-hero-section [hero]="content.hero"></app-hero-section>
-  <app-features-section [features]="content.features"></app-features-section>
-  <app-mentors-section [faculty]="content.faculty"></app-mentors-section>
-  <app-results-section [testimonials]="content.testimonials"></app-results-section>
-  <app-programs-section [plans]="content.plans"></app-programs-section>
-  <app-reviews-section [faqs]="content.faqs"></app-reviews-section>
-  <app-admissions-section [newsletter]="content.newsletter"></app-admissions-section>
+  <app-site-header
+    [actions]="content().site.headerActions"
+    [brand]="content().site.brandName"
+    [navItems]="content().site.navItems"
+  ></app-site-header>
+  <app-hero-section [hero]="content().home.hero"></app-hero-section>
+  <app-features-section
+    [eyebrow]="content().home.featuresSection.eyebrow"
+    [features]="content().home.featuresSection.items"
+  ></app-features-section>
+  <app-mentors-section
+    [description]="content().home.facultySection.description"
+    [faculty]="content().home.facultySection.items"
+    [titleAccent]="content().home.facultySection.titleAccent"
+    [titlePrefix]="content().home.facultySection.titlePrefix"
+  ></app-mentors-section>
+  <app-results-section
+    [description]="content().home.testimonialsSection.description"
+    [testimonials]="content().home.testimonialsSection.items"
+    [titleAccent]="content().home.testimonialsSection.titleAccent"
+    [titlePrefix]="content().home.testimonialsSection.titlePrefix"
+  ></app-results-section>
+  <app-programs-section
+    [description]="content().home.plansSection.description"
+    [plans]="content().home.plansSection.items"
+    [titleAccent]="content().home.plansSection.titleAccent"
+    [titlePrefix]="content().home.plansSection.titlePrefix"
+  ></app-programs-section>
+  <app-reviews-section
+    [description]="content().home.faqSection.description"
+    [faqs]="content().home.faqSection.items"
+    [titleAccent]="content().home.faqSection.titleAccent"
+    [titlePrefix]="content().home.faqSection.titlePrefix"
+  ></app-reviews-section>
+  <app-admissions-section [newsletter]="content().home.newsletter"></app-admissions-section>
 </main>

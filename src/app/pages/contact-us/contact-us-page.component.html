@@ -1,19 +1,26 @@
 <main appMotionPage class="page-shell contact-page">
-  <app-site-header [actions]="actions" [brand]="brand" [navItems]="navItems"></app-site-header>
+  <app-site-header
+    [actions]="content().site.headerActions"
+    [brand]="content().site.brandName"
+    [navItems]="content().site.navItems"
+  ></app-site-header>
 
   <section class="contact-page__hero">
     <div class="section-shell contact-page__hero-shell" data-immediate="true" data-reveal="hero">
-      <p class="contact-page__eyebrow"><i aria-hidden="true" class="fa-solid fa-headset"></i>Expert Academic Support</p>
-      <h1>Get in Touch with Our Experts</h1>
-      <p class="contact-page__copy">
-        We're here to guide you on your academic journey. Reach out for any queries or support regarding admissions, courses,
-        or technical help.
-      </p>
+      <p class="contact-page__eyebrow"><i aria-hidden="true" class="fa-solid fa-headset"></i>{{ content().contact.hero.eyebrow }}</p>
+      <h1>{{ content().contact.hero.title }}</h1>
+      <p class="contact-page__copy">{{ content().contact.hero.description }}</p>
 
       <div class="contact-page__hero-points">
-        <p><i aria-hidden="true" class="fa-solid fa-clock"></i>24/7 Portal Access</p>
-        <p><i aria-hidden="true" class="fa-solid fa-user-tie"></i>Expert Counselors</p>
-        <p><i aria-hidden="true" class="fa-solid fa-globe"></i>Nationwide Presence</p>
+        @for (point of content().contact.hero.points; track point; let index = $index) {
+          <p>
+            <i
+              [class]="'fa-solid ' + (index === 0 ? 'fa-clock' : index === 1 ? 'fa-user-tie' : 'fa-globe')"
+              aria-hidden="true"
+            ></i>
+            {{ point }}
+          </p>
+        }
       </div>
     </div>
   </section>
@@ -22,60 +29,58 @@
     <div class="section-shell contact-page__grid">
       <article class="contact-page__form-card" data-reveal="fade-right">
         <div class="contact-page__card-intro">
-          <h2>Quick Enquiry</h2>
-          <p>Fill in the details below and our academic counselors will reach out to you shortly.</p>
+          <h2>{{ content().contact.enquiryForm.title }}</h2>
+          <p>{{ content().contact.enquiryForm.description }}</p>
         </div>
 
         <form class="contact-page__form">
           <label>
-            <span>Student Name</span>
-            <input placeholder="Enter your full name" type="text" />
+            <span>{{ content().contact.enquiryForm.studentNameLabel }}</span>
+            <input [placeholder]="content().contact.enquiryForm.studentNamePlaceholder" type="text" />
           </label>
 
           <div class="contact-page__form-row">
             <label>
-              <span>Class</span>
+              <span>{{ content().contact.enquiryForm.classLabel }}</span>
               <select>
-                <option>Select Class</option>
-                <option>Class 6-8</option>
-                <option>Class 9-10</option>
-                <option>Class 11-12</option>
+                @for (option of content().contact.enquiryForm.classOptions; track option) {
+                  <option>{{ option }}</option>
+                }
               </select>
             </label>
 
             <label>
-              <span>Exam Interest</span>
+              <span>{{ content().contact.enquiryForm.goalLabel }}</span>
               <select>
-                <option>Select Goal</option>
-                <option>Boards</option>
-                <option>IIT-JEE</option>
-                <option>Foundation</option>
+                @for (option of content().contact.enquiryForm.goalOptions; track option) {
+                  <option>{{ option }}</option>
+                }
               </select>
             </label>
           </div>
 
           <label>
-            <span>Phone Number</span>
+            <span>{{ content().contact.enquiryForm.phoneLabel }}</span>
             <div class="contact-page__phone">
-              <small>+91</small>
-              <input placeholder="10-digit mobile number" type="tel" />
+              <small>{{ content().contact.enquiryForm.phonePrefix }}</small>
+              <input [placeholder]="content().contact.enquiryForm.phonePlaceholder" type="tel" />
             </div>
           </label>
 
           <button type="button">
-            <span>Request Call Back</span>
+            <span>{{ content().contact.enquiryForm.submitLabel }}</span>
             <i aria-hidden="true" class="contact-page__button-arrow fa-solid fa-arrow-right"></i>
           </button>
 
           <div class="contact-page__form-meta">
             <i aria-hidden="true" class="contact-page__meta-dot fa-regular fa-clock"></i>
-            <small>We typically respond within 2 hours.</small>
+            <small>{{ content().contact.enquiryForm.responseNote }}</small>
           </div>
         </form>
       </article>
 
       <div class="contact-page__info">
-        @for (card of quickCards; track card.label; let index = $index) {
+        @for (card of content().contact.quickCards; track card.label; let index = $index) {
           <article class="contact-page__info-card" [attr.data-delay]="index * 0.08" data-reveal="fade-left">
             <span class="contact-page__info-icon-wrap" aria-hidden="true">
               <i
@@ -95,10 +100,10 @@
         }
 
         <article class="contact-page__office-card" data-delay="0.18" data-reveal="fade-left">
-          <p class="contact-page__office-label">Head Office</p>
-          <h3>LearningLab Academy Tower</h3>
-          <p>Plot 42, Knowledge Park III, Near Metro Station, New Delhi, 110001, India</p>
-          <strong>Available Nationwide via Online Access</strong>
+          <p class="contact-page__office-label">{{ content().contact.officeCard.label }}</p>
+          <h3>{{ content().contact.officeCard.title }}</h3>
+          <p>{{ content().contact.officeCard.address }}</p>
+          <strong>{{ content().contact.officeCard.emphasis }}</strong>
         </article>
       </div>
     </div>
@@ -107,22 +112,22 @@
   <section class="contact-page__section">
     <div class="section-shell">
       <div class="contact-page__section-head" data-reveal="fade-up">
-        <h2>Find us on the Map</h2>
+        <h2>{{ content().contact.mapSection.title }}</h2>
       </div>
 
       <div class="contact-page__map" data-parallax-root data-reveal="zoom">
-        <iframe [src]="mapUrl" loading="lazy" title="LearningLab office map"></iframe>
+        <iframe [src]="mapUrl()" loading="lazy" [title]="content().contact.mapSection.iframeTitle"></iframe>
         <a
           class="contact-page__map-card"
           data-axis="x"
           data-parallax="14"
-          [href]="mapExternalUrl"
+          [href]="content().contact.mapSection.externalUrl"
           rel="noreferrer"
           target="_blank"
         >
           <i aria-hidden="true" class="contact-page__map-pin fa-solid fa-location-dot"></i>
-          <strong>LearningLab HQ</strong>
-          <p>Open in Google Maps</p>
+          <strong>{{ content().contact.mapSection.cardTitle }}</strong>
+          <p>{{ content().contact.mapSection.cardDescription }}</p>
         </a>
       </div>
     </div>
@@ -130,17 +135,17 @@
 
   <section class="contact-page__cta">
     <div class="section-shell contact-page__cta-shell" data-reveal="zoom">
-      <h2>Experience Live Learning Today</h2>
-      <p>Join thousands of students who are excelling with our live interactive classes. Book your slot now for a free demo session.</p>
+      <h2>{{ content().contact.cta.title }}</h2>
+      <p>{{ content().contact.cta.description }}</p>
 
       <div class="contact-page__cta-actions">
         <a class="contact-page__button contact-page__button--accent" routerLink="/contact-us">
           <i aria-hidden="true" class="contact-page__cta-icon fa-solid fa-calendar-days"></i>
-          <span>Book Free Demo Class</span>
+          <span>{{ content().contact.cta.primaryLabel }}</span>
         </a>
         <a class="contact-page__button contact-page__button--light" routerLink="/live-classes">
           <i aria-hidden="true" class="contact-page__cta-icon fa-solid fa-desktop"></i>
-          <span>Join Live via Web/App</span>
+          <span>{{ content().contact.cta.secondaryLabel }}</span>
         </a>
       </div>
     </div>

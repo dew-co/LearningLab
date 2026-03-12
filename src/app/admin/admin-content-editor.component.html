@@ -1,0 +1,126 @@
+<ng-container
+  [ngTemplateOutlet]="nodeEditor"
+  [ngTemplateOutletContext]="{
+    node: model(),
+    nodePrototype: prototype(),
+    nodeParent: parent(),
+    nodeKey: keyOrIndex(),
+    nodeLabel: label(),
+    nodeRawKey: rawKey(),
+    nodeDepth: depth()
+  }"
+></ng-container>
+
+<ng-template
+  #nodeEditor
+  let-node="node"
+  let-nodePrototype="nodePrototype"
+  let-nodeParent="nodeParent"
+  let-nodeKey="nodeKey"
+  let-nodeLabel="nodeLabel"
+  let-nodeRawKey="nodeRawKey"
+  let-nodeDepth="nodeDepth"
+>
+  @if (isRecord(node)) {
+    <section class="admin-editor__group" [class.admin-editor__group--root]="nodeDepth === 0">
+      @if (nodeDepth > 0) {
+        <div class="admin-editor__group-head">
+          <h4>{{ nodeLabel }}</h4>
+        </div>
+      }
+
+      <div class="admin-editor__group-body">
+        @for (entry of objectEntries(node, nodePrototype); track entry.key) {
+          <ng-container
+            [ngTemplateOutlet]="nodeEditor"
+            [ngTemplateOutletContext]="{
+              node: entry.value,
+              nodePrototype: entry.prototype,
+              nodeParent: node,
+              nodeKey: entry.key,
+              nodeLabel: humanize(entry.key),
+              nodeRawKey: entry.key,
+              nodeDepth: nodeDepth + 1
+            }"
+          ></ng-container>
+        }
+      </div>
+    </section>
+  } @else if (isArray(node)) {
+    <section class="admin-editor__group">
+      <div class="admin-editor__group-head">
+        <h4>{{ nodeLabel }}</h4>
+        <button type="button" (click)="addArrayItem(node, nodePrototype)">Add Item</button>
+      </div>
+
+      @if (node.length === 0) {
+        <p class="admin-editor__empty">No items yet. Add a new one to populate this section.</p>
+      } @else {
+        <div class="admin-editor__array">
+          @for (item of node; track $index) {
+            <article class="admin-editor__array-card">
+              <div class="admin-editor__array-head">
+                <strong>{{ summarizeItem(item, $index) }}</strong>
+                <button type="button" (click)="removeArrayItem(node, $index)">Remove</button>
+              </div>
+
+              <ng-container
+                [ngTemplateOutlet]="nodeEditor"
+                [ngTemplateOutletContext]="{
+                  node: item,
+                  nodePrototype: arrayPrototypeItem(nodePrototype, $index),
+                  nodeParent: node,
+                  nodeKey: $index,
+                  nodeLabel: summarizeItem(item, $index),
+                  nodeRawKey: nodeRawKey,
+                  nodeDepth: nodeDepth + 1
+                }"
+              ></ng-container>
+            </article>
+          }
+        </div>
+      }
+    </section>
+  } @else if (isBoolean(node)) {
+    <label class="admin-editor__field admin-editor__field--toggle">
+      <span>{{ nodeLabel }}</span>
+      <input
+        type="checkbox"
+        [ngModel]="node"
+        (ngModelChange)="updatePrimitive(nodeParent, nodeKey, $event)"
+      />
+    </label>
+  } @else if (isNumber(node)) {
+    <label class="admin-editor__field">
+      <span>{{ nodeLabel }}</span>
+      <input
+        type="number"
+        [ngModel]="node"
+        (ngModelChange)="updatePrimitive(nodeParent, nodeKey, $event)"
+      />
+    </label>
+  } @else {
+    <label class="admin-editor__field">
+      <span>{{ nodeLabel }}</span>
+      @if (usesTextarea(nodeRawKey, node)) {
+        <textarea
+          rows="4"
+          [ngModel]="node ?? ''"
+          (ngModelChange)="updatePrimitive(nodeParent, nodeKey, $event)"
+        ></textarea>
+      } @else {
+        <input
+          [type]="inputType(nodeRawKey)"
+          [ngModel]="node ?? ''"
+          (ngModelChange)="updatePrimitive(nodeParent, nodeKey, $event)"
+        />
+      }
+
+      @if (isImageField(nodeRawKey, node)) {
+        <div class="admin-editor__image-preview">
+          <img [alt]="nodeLabel + ' preview'" [src]="node || ''" />
+        </div>
+      }
+    </label>
+  }
+</ng-template>

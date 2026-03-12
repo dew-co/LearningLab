@@ -1,10 +1,13 @@
 <router-outlet></router-outlet>
-<app-scroll-top-button></app-scroll-top-button>
-<app-site-footer
-  [brand]="brand"
-  [description]="footerDescription"
-  [quickLinks]="footerQuickLinks"
-  [contactItems]="footerContactItems"
-  [socialLinks]="footerSocialLinks"
-  [legalLinks]="footerLegalLinks"
-></app-site-footer>
+<app-toast-container></app-toast-container>
+@if (showSiteChrome()) {
+  <app-scroll-top-button></app-scroll-top-button>
+  <app-site-footer
+    [brand]="content().site.brandName"
+    [contactItems]="content().site.footerContactItems"
+    [description]="content().site.footerDescription"
+    [legalLinks]="content().site.footerLegalLinks"
+    [quickLinks]="content().site.footerQuickLinks"
+    [socialLinks]="content().site.footerSocialLinks"
+  ></app-site-footer>
+}

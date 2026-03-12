@@ -1,5 +1,9 @@
 <div appMotionPage class="legal-page">
-  <app-site-header [brand]="brand" [navItems]="navItems" [actions]="actions"></app-site-header>
+  <app-site-header
+    [actions]="content().site.headerActions"
+    [brand]="content().site.brandName"
+    [navItems]="content().site.navItems"
+  ></app-site-header>
 
   <section class="legal-page__hero">
     <div class="section-shell legal-page__hero-shell" data-immediate="true" data-reveal="hero">

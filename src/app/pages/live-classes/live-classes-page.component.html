@@ -1,24 +1,25 @@
 <main appMotionPage class="live-page">
-  <app-site-header [actions]="actions" [brand]="brand" [navItems]="navItems"></app-site-header>
+  <app-site-header
+    [actions]="content().site.headerActions"
+    [brand]="content().site.brandName"
+    [navItems]="content().site.navItems"
+  ></app-site-header>
 
   <section class="live-page__hero">
     <div class="section-shell live-page__hero-shell" data-immediate="true" data-reveal="hero">
-      <p class="live-page__eyebrow">Live Interactive Sessions</p>
+      <p class="live-page__eyebrow">{{ content().liveClasses.hero.eyebrow }}</p>
       <h1>
-        Experience India's
+        {{ content().liveClasses.hero.titlePrefix }}
         <br />
-        Best <span>Live<br />Interactive</span>
+        <span>{{ content().liveClasses.hero.titleAccent }}</span>
         <br />
-        Classes
+        {{ content().liveClasses.hero.titleSuffix }}
       </h1>
-      <p>
-        Learn anytime, anywhere on our Learning App and Website. Engage in two-way interaction and real-time doubt solving with
-        expert faculty from across India.
-      </p>
+      <p>{{ content().liveClasses.hero.description }}</p>
 
       <div class="live-page__hero-actions">
-        <a class="live-page__button live-page__button--accent" routerLink="/contact-us">Book Free Live Demo</a>
-        <a class="live-page__button live-page__button--light" routerLink="/contact-us">Join via App or Website</a>
+        <a class="live-page__button live-page__button--accent" routerLink="/contact-us">{{ content().liveClasses.hero.primaryCtaLabel }}</a>
+        <a class="live-page__button live-page__button--light" routerLink="/contact-us">{{ content().liveClasses.hero.secondaryCtaLabel }}</a>
       </div>
 
       <div aria-hidden="true" class="live-page__hero-divider"></div>
@@ -28,12 +29,12 @@
   <section class="live-page__section live-page__section--centered">
     <div class="section-shell">
       <div class="live-page__section-head live-page__section-head--center" data-reveal="fade-up">
-        <h2>How Live Classes Work</h2>
+        <h2>{{ content().liveClasses.stepsSection.title }}</h2>
         <span></span>
       </div>
 
       <div class="live-page__timeline">
-        @for (step of steps; track step.title; let index = $index) {
+        @for (step of content().liveClasses.stepsSection.items; track step.title; let index = $index) {
           <article class="live-page__timeline-step" [attr.data-delay]="index * 0.08" data-reveal="fade-up">
             <span>
               @switch (index) {
@@ -55,12 +56,12 @@
   <section class="live-page__section live-page__section--alt">
     <div class="section-shell">
       <div class="live-page__section-head" data-reveal="fade-up">
-        <h2>What Makes Us Different</h2>
-        <p>We focus on more than just teaching; we ensure personalized attention and measurable progress for every single student.</p>
+        <h2>{{ content().liveClasses.benefitsSection.title }}</h2>
+        <p>{{ content().liveClasses.benefitsSection.description }}</p>
       </div>
 
       <div class="live-page__benefit-grid">
-        @for (benefit of benefits; track benefit.title; let index = $index) {
+        @for (benefit of content().liveClasses.benefitsSection.items; track benefit.title; let index = $index) {
           <article class="live-page__card" [attr.data-delay]="index * 0.06" data-reveal="fade-up">
             @switch (index) {
               @case (0) { <i aria-hidden="true" class="live-page__icon fa-solid fa-users"></i> }
@@ -83,15 +84,15 @@
   <section class="live-page__section live-page__section--centered" id="ecosystem">
     <div class="section-shell">
       <div class="live-page__section-head live-page__section-head--center" data-reveal="fade-up">
-        <h2>Tech-Enabled Learning Ecosystem</h2>
-        <p>Bridging the gap between students and parents through advanced analytics and seamless communication.</p>
+        <h2>{{ content().liveClasses.ecosystemSection.title }}</h2>
+        <p>{{ content().liveClasses.ecosystemSection.description }}</p>
       </div>
 
       <div class="live-page__ecosystem">
         <article class="live-page__ecosystem-card live-page__ecosystem-card--accent" data-reveal="fade-right">
-          <h3>For Students</h3>
+          <h3>{{ content().liveClasses.ecosystemSection.studentTitle }}</h3>
           <div class="live-page__ecosystem-list">
-            @for (item of studentItems; track item.title) {
+            @for (item of content().liveClasses.ecosystemSection.studentItems; track item.title) {
               <div>
                 <h4>{{ item.title }}</h4>
                 <p>{{ item.description }}</p>
@@ -101,9 +102,9 @@
         </article>
 
         <article class="live-page__ecosystem-card live-page__ecosystem-card--dark" data-delay="0.1" data-reveal="fade-left">
-          <h3>For Parents</h3>
+          <h3>{{ content().liveClasses.ecosystemSection.parentTitle }}</h3>
           <div class="live-page__ecosystem-list">
-            @for (item of parentItems; track item.title) {
+            @for (item of content().liveClasses.ecosystemSection.parentItems; track item.title) {
               <div>
                 <h4>{{ item.title }}</h4>
                 <p>{{ item.description }}</p>
@@ -118,12 +119,12 @@
   <section class="live-page__section live-page__section--centered live-page__section--white">
     <div class="section-shell">
       <div class="live-page__section-head live-page__section-head--center" data-reveal="fade-up">
-        <h2>Choose Your Program</h2>
-        <p>Tailored learning paths for every stage of your academic journey.</p>
+        <h2>{{ content().liveClasses.programsSection.title }}</h2>
+        <p>{{ content().liveClasses.programsSection.description }}</p>
       </div>
 
       <div class="live-page__program-grid">
-        @for (program of programs; track program.title; let index = $index) {
+        @for (program of content().liveClasses.programsSection.items; track program.title; let index = $index) {
           <article
             class="live-page__program-card"
             [attr.data-delay]="index * 0.08"
@@ -148,22 +149,22 @@
 
   <section class="live-page__cta">
     <div class="section-shell live-page__cta-shell" data-reveal="zoom">
-      <h2>Ready to Start Your Journey?</h2>
-      <p>Join over 100,000+ students who have transformed their grades with our interactive live sessions. Join a free demo class today.</p>
+      <h2>{{ content().liveClasses.cta.title }}</h2>
+      <p>{{ content().liveClasses.cta.description }}</p>
 
       <div class="live-page__cta-actions">
-        <a class="live-page__button live-page__button--accent" routerLink="/contact-us">Book Free Demo</a>
+        <a class="live-page__button live-page__button--accent" routerLink="/contact-us">{{ content().liveClasses.cta.primaryLabel }}</a>
         <a class="live-page__button live-page__button--dark" routerLink="/contact-us">
           <i aria-hidden="true" class="fa-solid fa-headset"></i>
-          Speak to a Counselor
+          {{ content().liveClasses.cta.secondaryLabel }}
         </a>
         <a class="live-page__button live-page__button--green" routerLink="/contact-us">
           <i aria-hidden="true" class="fa-brands fa-whatsapp"></i>
-          WhatsApp Enquiry
+          {{ content().liveClasses.cta.tertiaryLabel }}
         </a>
       </div>
 
-      <small>Demo classes are free of cost. No credit card required.</small>
+      <small>{{ content().liveClasses.cta.note }}</small>
     </div>
   </section>
 </main>

@@ -1,30 +1,31 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter, map, startWith } from 'rxjs';
 
 import { ScrollTopButtonComponent } from './components/scroll-top-button/scroll-top-button.component';
 import { SiteFooterComponent } from './components/site-footer/site-footer.component';
-import {
-  SITE_BRAND_NAME,
-  SITE_FOOTER_CONTACT_ITEMS,
-  SITE_FOOTER_DESCRIPTION,
-  SITE_FOOTER_LEGAL_LINKS,
-  SITE_FOOTER_QUICK_LINKS,
-  SITE_FOOTER_SOCIAL_LINKS
-} from './site.config';
+import { SiteContentService } from './site-content.service';
+import { ToastContainerComponent } from './toast/toast-container.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, SiteFooterComponent, ScrollTopButtonComponent],
+  imports: [RouterOutlet, SiteFooterComponent, ScrollTopButtonComponent, ToastContainerComponent],
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class App {
-  readonly brand = SITE_BRAND_NAME;
-  readonly footerDescription = SITE_FOOTER_DESCRIPTION;
-  readonly footerQuickLinks = SITE_FOOTER_QUICK_LINKS;
-  readonly footerContactItems = SITE_FOOTER_CONTACT_ITEMS;
-  readonly footerSocialLinks = SITE_FOOTER_SOCIAL_LINKS;
-  readonly footerLegalLinks = SITE_FOOTER_LEGAL_LINKS;
+  private readonly router = inject(Router);
+  readonly content = inject(SiteContentService).content;
+  private readonly currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map(() => this.router.url),
+      startWith(this.router.url)
+    ),
+    { initialValue: this.router.url }
+  );
+  readonly showSiteChrome = computed(() => !this.currentUrl().startsWith('/admin'));
 }

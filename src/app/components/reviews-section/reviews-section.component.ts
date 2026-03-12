@@ -10,6 +10,9 @@ import type { FaqItem } from '../../landing-page.data';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReviewsSectionComponent {
+  readonly titlePrefix = input.required<string>();
+  readonly titleAccent = input.required<string>();
+  readonly description = input.required<string>();
   readonly faqs = input.required<FaqItem[]>();
   readonly expandedIndex = signal<number | null>(0);
 

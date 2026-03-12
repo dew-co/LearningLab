@@ -1,13 +1,15 @@
 <main appMotionPage class="page-shell admission-page">
-  <app-site-header [actions]="actions" [brand]="brand" [navItems]="navItems"></app-site-header>
+  <app-site-header
+    [actions]="content().site.headerActions"
+    [brand]="content().site.brandName"
+    [navItems]="content().site.navItems"
+  ></app-site-header>
 
   <section class="admission-page__hero">
     <div class="section-shell admission-page__hero-shell" data-immediate="true" data-reveal="hero">
-      <p class="admission-page__eyebrow">Admissions Open 2024-25</p>
-      <h1>Admission Request Form</h1>
-      <p class="admission-page__copy">
-        The first step toward your academic success. Join over 5,000+ successful students today and transform your future.
-      </p>
+      <p class="admission-page__eyebrow">{{ content().admission.hero.eyebrow }}</p>
+      <h1>{{ content().admission.hero.title }}</h1>
+      <p class="admission-page__copy">{{ content().admission.hero.description }}</p>
     </div>
   </section>
 
@@ -18,37 +20,30 @@
           <section class="admission-page__form-section">
             <div class="admission-page__section-head">
               <i aria-hidden="true" class="admission-page__section-icon fa-solid fa-user-graduate"></i>
-              <h2>Student Details</h2>
+              <h2>{{ content().admission.form.studentDetailsTitle }}</h2>
             </div>
 
             <div class="admission-page__field-grid admission-page__field-grid--two">
               <label class="admission-page__field">
-                <span>Full Name</span>
-                <input name="fullName" placeholder="e.g. John Doe" required type="text" />
+                <span>{{ content().admission.form.fullNameLabel }}</span>
+                <input name="fullName" [placeholder]="content().admission.form.fullNamePlaceholder" required type="text" />
               </label>
 
               <label class="admission-page__field">
-                <span>Current Class</span>
+                <span>{{ content().admission.form.currentClassLabel }}</span>
                 <select name="currentClass" required>
-                  <option value="">Select Class</option>
-                  <option>Class 6</option>
-                  <option>Class 7</option>
-                  <option>Class 8</option>
-                  <option>Class 9</option>
-                  <option>Class 10</option>
-                  <option>Class 11</option>
-                  <option>Class 12</option>
+                  @for (option of content().admission.form.currentClassOptions; track option; let index = $index) {
+                    <option [value]="index === 0 ? '' : option">{{ option }}</option>
+                  }
                 </select>
               </label>
 
               <label class="admission-page__field admission-page__field--full">
-                <span>Desired Course</span>
+                <span>{{ content().admission.form.desiredCourseLabel }}</span>
                 <select name="desiredCourse" required>
-                  <option value="">Select Program</option>
-                  <option>Foundation Program</option>
-                  <option>Boards Excellence</option>
-                  <option>IIT-JEE Preparation</option>
-                  <option>Live Classes Combo</option>
+                  @for (option of content().admission.form.desiredCourseOptions; track option; let index = $index) {
+                    <option [value]="index === 0 ? '' : option">{{ option }}</option>
+                  }
                 </select>
               </label>
             </div>
@@ -57,22 +52,21 @@
           <section class="admission-page__form-section">
             <div class="admission-page__section-head">
               <i aria-hidden="true" class="admission-page__section-icon fa-solid fa-school"></i>
-              <h2>Academic Background</h2>
+              <h2>{{ content().admission.form.academicBackgroundTitle }}</h2>
             </div>
 
             <div class="admission-page__field-grid admission-page__field-grid--two">
               <label class="admission-page__field">
-                <span>Previous School Name</span>
-                <input name="schoolName" placeholder="Enter school name" required type="text" />
+                <span>{{ content().admission.form.previousSchoolLabel }}</span>
+                <input name="schoolName" [placeholder]="content().admission.form.previousSchoolPlaceholder" required type="text" />
               </label>
 
               <label class="admission-page__field">
-                <span>Board</span>
+                <span>{{ content().admission.form.boardLabel }}</span>
                 <select name="board" required>
-                  <option>CBSE</option>
-                  <option>ICSE</option>
-                  <option>State Board</option>
-                  <option>IB</option>
+                  @for (option of content().admission.form.boardOptions; track option) {
+                    <option>{{ option }}</option>
+                  }
                 </select>
               </label>
             </div>
@@ -81,50 +75,47 @@
           <section class="admission-page__form-section">
             <div class="admission-page__section-head">
               <i aria-hidden="true" class="admission-page__section-icon fa-solid fa-location-dot"></i>
-              <h2>Contact &amp; Location</h2>
+              <h2>{{ content().admission.form.contactLocationTitle }}</h2>
             </div>
 
             <div class="admission-page__field-grid admission-page__field-grid--two">
               <label class="admission-page__field">
-                <span>Parent's Mobile Number</span>
-                <input name="phone" placeholder="+91 000-0000" required type="tel" />
+                <span>{{ content().admission.form.parentPhoneLabel }}</span>
+                <input name="phone" [placeholder]="content().admission.form.parentPhonePlaceholder" required type="tel" />
               </label>
 
               <label class="admission-page__field">
-                <span>City</span>
-                <input name="city" placeholder="Your City" required type="text" />
+                <span>{{ content().admission.form.cityLabel }}</span>
+                <input name="city" [placeholder]="content().admission.form.cityPlaceholder" required type="text" />
               </label>
 
               <label class="admission-page__field admission-page__field--full">
-                <span>State / Region</span>
-                <input name="state" placeholder="Your State" required type="text" />
+                <span>{{ content().admission.form.stateLabel }}</span>
+                <input name="state" [placeholder]="content().admission.form.statePlaceholder" required type="text" />
               </label>
             </div>
           </section>
 
           <button class="admission-page__submit" type="submit">
-            <span>Submit Admission Request</span>
+            <span>{{ content().admission.form.submitLabel }}</span>
             <i aria-hidden="true" class="admission-page__submit-arrow fa-solid fa-arrow-right"></i>
           </button>
 
-          <p class="admission-page__response-note">Expected response time: 24-48 hours</p>
+          <p class="admission-page__response-note">{{ content().admission.form.responseNote }}</p>
 
           <div class="admission-page__privacy-card">
             <i aria-hidden="true" class="admission-page__privacy-icon fa-solid fa-shield-heart"></i>
-            <p>
-              We value your privacy. Your information is securely encrypted and will only be used to contact you regarding
-              admission queries and course updates.
-            </p>
+            <p>{{ content().admission.form.privacyText }}</p>
           </div>
         </form>
       </article>
 
       <aside class="admission-page__sidebar">
         <article class="admission-page__steps-card" data-reveal="fade-left">
-          <h2>What Happens Next?</h2>
+          <h2>{{ content().admission.stepsPanel.title }}</h2>
 
           <ol class="admission-page__steps-list">
-            @for (step of steps; track step.title; let index = $index) {
+            @for (step of content().admission.stepsPanel.items; track step.title; let index = $index) {
               <li
                 class="admission-page__step"
                 [class.admission-page__step--solid]="step.tone === 'solid'"
@@ -142,23 +133,23 @@
         </article>
 
         <article class="admission-page__help-card" data-delay="0.08" data-reveal="fade-left">
-          <h2>Need Help Now?</h2>
-          <p>Talk to our admissions office for immediate assistance.</p>
+          <h2>{{ content().admission.helpPanel.title }}</h2>
+          <p>{{ content().admission.helpPanel.description }}</p>
           <a class="admission-page__help-action admission-page__help-action--light" routerLink="/contact-us">
             <i aria-hidden="true" class="fa-solid fa-phone-volume"></i>
-            <span>Call Counselor</span>
+            <span>{{ content().admission.helpPanel.callLabel }}</span>
           </a>
           <a class="admission-page__help-action admission-page__help-action--green" routerLink="/contact-us">
             <i aria-hidden="true" class="fa-brands fa-whatsapp"></i>
-            <span>WhatsApp Us</span>
+            <span>{{ content().admission.helpPanel.whatsappLabel }}</span>
           </a>
         </article>
 
         <article class="admission-page__promo-card" data-delay="0.14" data-parallax-root data-reveal="zoom">
-          <img alt="Academic mentor counseling students" data-parallax="18" src="design/mentor-b.jpg" />
+          <img [alt]="content().admission.promoCard.imageAlt" data-parallax="18" [src]="content().admission.promoCard.imageSrc" />
           <div class="admission-page__promo-copy">
-            <h3>Experience the LearningLab Advantage</h3>
-            <p>Live labs, expert faculty, and peer learning.</p>
+            <h3>{{ content().admission.promoCard.title }}</h3>
+            <p>{{ content().admission.promoCard.description }}</p>
           </div>
         </article>
       </aside>
@@ -167,12 +158,12 @@
 
   <section class="admission-page__cta">
     <div class="section-shell admission-page__cta-shell" data-reveal="zoom">
-      <h2>Want to see us in action?</h2>
-      <p>Experience our unique teaching methodology before you commit. Book a free live demo session today.</p>
+      <h2>{{ content().admission.cta.title }}</h2>
+      <p>{{ content().admission.cta.description }}</p>
 
       <div class="admission-page__cta-actions">
-        <a class="admission-page__cta-button admission-page__cta-button--accent" routerLink="/contact-us">Book Free Demo Class</a>
-        <a class="admission-page__cta-button admission-page__cta-button--ghost" routerLink="/live-classes">Join Live via App/Web</a>
+        <a class="admission-page__cta-button admission-page__cta-button--accent" routerLink="/contact-us">{{ content().admission.cta.primaryLabel }}</a>
+        <a class="admission-page__cta-button admission-page__cta-button--ghost" routerLink="/live-classes">{{ content().admission.cta.secondaryLabel }}</a>
       </div>
     </div>
   </section>

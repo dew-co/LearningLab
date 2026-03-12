@@ -1,6 +1,6 @@
 <section class="features-section" id="features">
   <div class="section-shell">
-    <p class="features-section__eyebrow" data-reveal="fade-up">WHY 50,000+ STUDENTS TRUST US</p>
+    <p class="features-section__eyebrow" data-reveal="fade-up">{{ eyebrow() }}</p>
 
     <div class="features-section__grid">
       @for (feature of features(); track feature.title; let index = $index) {

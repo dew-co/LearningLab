@@ -1,0 +1,31 @@
+<main class="admin-login">
+  <section class="admin-login__panel">
+    <div class="admin-login__copy">
+      <p class="admin-login__eyebrow">Admin Access</p>
+      <h1>{{ content().site.brandName }} Control Center</h1>
+      <p>
+        Sign in to manage page content, image references, navigation, footer settings, and the admin workspace itself.
+      </p>
+
+      <div class="admin-login__credentials">
+        <strong>Default login</strong>
+        <p>{{ defaultCredentials.email }}</p>
+        <p>{{ defaultCredentials.password }}</p>
+      </div>
+    </div>
+
+    <form class="admin-login__form" (ngSubmit)="submit()">
+      <div class="admin-login__field">
+        <label for="admin-email">Email</label>
+        <input id="admin-email" [(ngModel)]="email" name="email" type="email" required />
+      </div>
+
+      <div class="admin-login__field">
+        <label for="admin-password">Password</label>
+        <input id="admin-password" [(ngModel)]="password" name="password" type="password" required />
+      </div>
+
+      <button type="submit">Open Admin Dashboard</button>
+    </form>
+  </section>
+</main>

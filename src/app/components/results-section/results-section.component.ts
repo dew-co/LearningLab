@@ -10,5 +10,8 @@ import type { Testimonial } from '../../landing-page.data';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ResultsSectionComponent {
+  readonly titlePrefix = input.required<string>();
+  readonly titleAccent = input.required<string>();
+  readonly description = input.required<string>();
   readonly testimonials = input.required<Testimonial[]>();
 }

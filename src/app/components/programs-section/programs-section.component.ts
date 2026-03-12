@@ -10,5 +10,8 @@ import type { PricingPlan } from '../../landing-page.data';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProgramsSectionComponent {
+  readonly titlePrefix = input.required<string>();
+  readonly titleAccent = input.required<string>();
+  readonly description = input.required<string>();
   readonly plans = input.required<PricingPlan[]>();
 }

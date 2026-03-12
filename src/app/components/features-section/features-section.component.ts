@@ -10,5 +10,6 @@ import type { Feature } from '../../landing-page.data';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FeaturesSectionComponent {
+  readonly eyebrow = input.required<string>();
   readonly features = input.required<Feature[]>();
 }

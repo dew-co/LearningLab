@@ -10,5 +10,8 @@ import type { FacultyMember } from '../../landing-page.data';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MentorsSectionComponent {
+  readonly titlePrefix = input.required<string>();
+  readonly titleAccent = input.required<string>();
+  readonly description = input.required<string>();
   readonly faculty = input.required<FacultyMember[]>();
 }

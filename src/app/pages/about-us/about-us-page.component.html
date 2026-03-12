@@ -1,22 +1,27 @@
 <main appMotionPage class="about-page">
-  <app-site-header [actions]="actions" [brand]="brand" [navItems]="navItems"></app-site-header>
+  <app-site-header
+    [actions]="content().site.headerActions"
+    [brand]="content().site.brandName"
+    [navItems]="content().site.navItems"
+  ></app-site-header>
 
   <section class="about-page__hero">
     <div class="section-shell about-page__hero-shell" data-immediate="true" data-reveal="hero">
-      <p class="about-page__eyebrow">Empowering Success</p>
+      <p class="about-page__eyebrow">{{ content().about.hero.eyebrow }}</p>
       <h1>
-        Quality Education
+        {{ content().about.hero.titlePrefix }}
         <br />
-        for <span>Real Results</span>
+        <span>{{ content().about.hero.titleAccent }}</span>
       </h1>
-      <p class="about-page__copy">
-        Experience interactive live classes via our high-speed app and web platform. Our mission is to empower every student
-        with the tools they need for academic excellence and lifelong mastery.
-      </p>
+      <p class="about-page__copy">{{ content().about.hero.description }}</p>
 
       <div class="about-page__hero-points">
-        <p><i aria-hidden="true" class="fa-solid fa-video"></i>Live Interactive Sessions</p>
-        <p><i aria-hidden="true" class="fa-solid fa-seedling"></i>Mission-Driven Growth</p>
+        @for (point of content().about.hero.points; track point; let index = $index) {
+          <p>
+            <i [class]="'fa-solid ' + (index === 0 ? 'fa-video' : 'fa-seedling')" aria-hidden="true"></i>
+            {{ point }}
+          </p>
+        }
       </div>
     </div>
   </section>
@@ -24,12 +29,12 @@
   <section class="about-page__section">
     <div class="section-shell">
       <div class="about-page__section-head about-page__section-head--center" data-reveal="fade-up">
-        <h2>Our Teaching Philosophy</h2>
+        <h2>{{ content().about.philosophySection.title }}</h2>
         <span></span>
       </div>
 
       <div class="about-page__philosophy-grid">
-        @for (card of philosophyCards; track card.title; let index = $index) {
+        @for (card of content().about.philosophySection.items; track card.title; let index = $index) {
           <article class="about-page__card about-page__card--large" [attr.data-delay]="index * 0.1" data-reveal="fade-up">
             @if (index === 0) {
               <i aria-hidden="true" class="about-page__icon fa-solid fa-brain"></i>
@@ -47,12 +52,12 @@
   <section class="about-page__section about-page__section--alt">
     <div class="section-shell">
       <div class="about-page__section-head" data-reveal="fade-up">
-        <h2>What Makes Us Different</h2>
-        <p>Our comprehensive approach to digital learning ensures no student is left behind.</p>
+        <h2>{{ content().about.differenceSection.title }}</h2>
+        <p>{{ content().about.differenceSection.description }}</p>
       </div>
 
       <div class="about-page__difference-grid">
-        @for (card of differences; track card.title; let index = $index) {
+        @for (card of content().about.differenceSection.items; track card.title; let index = $index) {
           <article class="about-page__card about-page__card--compact" [attr.data-delay]="index * 0.05" data-reveal="fade-up">
             @switch (index) {
               @case (0) { <i aria-hidden="true" class="about-page__icon about-page__icon--small fa-solid fa-laptop"></i> }
@@ -75,20 +80,14 @@
   <section class="about-page__section" id="faculty">
     <div class="section-shell about-page__faculty">
       <div class="about-page__faculty-images" data-delay="0.08" data-parallax-root data-reveal="zoom">
-        <img alt="Faculty mentor working with students" data-parallax="18" src="design/mentor-c.jpg" />
-        <img alt="Senior faculty mentor" data-axis="x" data-parallax="14" src="design/mentor-b.jpg" />
+        <img [alt]="content().about.facultySection.primaryImageAlt" data-parallax="18" [src]="content().about.facultySection.primaryImageSrc" />
+        <img [alt]="content().about.facultySection.secondaryImageAlt" data-axis="x" data-parallax="14" [src]="content().about.facultySection.secondaryImageSrc" />
       </div>
 
       <div class="about-page__faculty-copy" data-reveal="fade-left">
-        <h2>Expert Faculty &amp; Dedicated Mentorship</h2>
-        <p>
-          Our teachers are not just subject experts; they are mentors. At LearningLab, we select only the top 1% of educators
-          who have a passion for simplification and a track record of guiding students to top ranks.
-        </p>
-        <p>
-          Beyond the lectures, our mentorship program ensures that every student receives emotional and tactical support to
-          navigate the pressures of competitive exams.
-        </p>
+        <h2>{{ content().about.facultySection.title }}</h2>
+        <p>{{ content().about.facultySection.paragraphOne }}</p>
+        <p>{{ content().about.facultySection.paragraphTwo }}</p>
       </div>
     </div>
   </section>
@@ -96,12 +95,12 @@
   <section class="about-page__section">
     <div class="section-shell">
       <div class="about-page__section-head about-page__section-head--center" data-reveal="fade-up">
-        <h2>Academic Segments We Serve</h2>
-        <p>Tailored programs for every stage of your academic journey.</p>
+        <h2>{{ content().about.segmentsSection.title }}</h2>
+        <p>{{ content().about.segmentsSection.description }}</p>
       </div>
 
       <div class="about-page__segment-grid">
-        @for (segment of segments; track segment.title; let index = $index) {
+        @for (segment of content().about.segmentsSection.items; track segment.title; let index = $index) {
           <article class="about-page__segment-card" [attr.data-delay]="index * 0.08" data-reveal="fade-up">
             @switch (index) {
               @case (0) { <i aria-hidden="true" class="about-page__segment-icon fa-solid fa-cubes"></i> }
@@ -120,16 +119,13 @@
   <section class="about-page__quote">
     <div class="section-shell" data-reveal="zoom">
       <p class="about-page__quote-mark" data-parallax="16">99</p>
-      <blockquote>
-        Our dedication goes beyond syllabus completion. We are committed to the intellectual and personal growth of every
-        student who walks through our virtual doors. At LearningLab, your ambition is our mission.
-      </blockquote>
+      <blockquote>{{ content().about.quoteSection.quote }}</blockquote>
 
       <div class="about-page__quote-author">
-        <span>EL</span>
+        <span>{{ content().about.quoteSection.authorInitials }}</span>
         <div>
-          <strong>Team LearningLab</strong>
-          <p>Academic Excellence Cell</p>
+          <strong>{{ content().about.quoteSection.authorName }}</strong>
+          <p>{{ content().about.quoteSection.authorRole }}</p>
         </div>
       </div>
     </div>
@@ -137,13 +133,13 @@
 
   <section class="about-page__cta">
     <div class="section-shell about-page__cta-shell" data-reveal="zoom">
-      <h2>Not Sure Which Course Is Right?</h2>
-      <p>Our academic counselors are here to help you design your ideal learning path.</p>
+      <h2>{{ content().about.cta.title }}</h2>
+      <p>{{ content().about.cta.description }}</p>
 
       <div class="about-page__cta-actions">
-        <a class="about-page__button about-page__button--accent" routerLink="/contact-us">Book Free Demo</a>
-        <a class="about-page__button about-page__button--light" routerLink="/contact-us">Speak to a Counselor</a>
-        <a class="about-page__button about-page__button--green" routerLink="/contact-us">WhatsApp Enquiry</a>
+        <a class="about-page__button about-page__button--accent" routerLink="/contact-us">{{ content().about.cta.primaryLabel }}</a>
+        <a class="about-page__button about-page__button--light" routerLink="/contact-us">{{ content().about.cta.secondaryLabel }}</a>
+        <a class="about-page__button about-page__button--green" routerLink="/contact-us">{{ content().about.cta.tertiaryLabel }}</a>
       </div>
     </div>
   </section>

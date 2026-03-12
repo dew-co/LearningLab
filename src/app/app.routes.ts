@@ -1,5 +1,8 @@
 import { Routes } from '@angular/router';
 
+import { adminAuthGuard, adminGuestGuard } from './admin/admin-auth.guards';
+import { AdminLoginPageComponent } from './admin/admin-login-page.component';
+import { AdminPageComponent } from './admin/admin-page.component';
 import { AdmissionPageComponent } from './pages/admission/admission-page.component';
 import { AdmissionThankYouPageComponent } from './pages/admission-thank-you/admission-thank-you-page.component';
 import { AboutUsPageComponent } from './pages/about-us/about-us-page.component';
@@ -12,6 +15,8 @@ import { ResultsPageComponent } from './pages/results/results-page.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'home' },
+  { path: 'admin/login', component: AdminLoginPageComponent, canActivate: [adminGuestGuard] },
+  { path: 'admin', component: AdminPageComponent, canActivate: [adminAuthGuard] },
   { path: 'home', component: HomePageComponent },
   { path: 'courses', component: CoursesPageComponent },
   { path: 'live-classes', component: LiveClassesPageComponent },

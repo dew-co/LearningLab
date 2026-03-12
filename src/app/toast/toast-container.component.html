@@ -1,0 +1,23 @@
+<section class="toast-stack" aria-atomic="true" aria-live="polite">
+  @for (toast of toastService.toasts(); track toast.id) {
+    <article
+      class="toast"
+      [class.toast--error]="toast.tone === 'error'"
+      [class.toast--success]="toast.tone === 'success'"
+      [class.toast--info]="toast.tone === 'info'"
+    >
+      <span class="toast__icon" aria-hidden="true">
+        <i class="fa-solid" [class]=" 'fa-solid ' + iconClass(toast.tone) "></i>
+      </span>
+
+      <div class="toast__copy">
+        <strong>{{ toast.title }}</strong>
+        <p>{{ toast.message }}</p>
+      </div>
+
+      <button type="button" (click)="dismiss(toast.id)" aria-label="Dismiss notification">
+        <i aria-hidden="true" class="fa-solid fa-xmark"></i>
+      </button>
+    </article>
+  }
+</section>

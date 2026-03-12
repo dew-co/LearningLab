@@ -1,0 +1,269 @@
+<main class="admin-shell">
+  <aside class="admin-shell__sidebar">
+    <div class="admin-shell__brand">
+      <p>Admin Panel</p>
+      <h1>{{ draft.site.brandName }}</h1>
+    </div>
+
+    <div class="admin-shell__profile-card">
+      <span>{{ adminSession()?.avatarLabel }}</span>
+      <div>
+        <strong>{{ adminSession()?.fullName }}</strong>
+        <p>{{ adminSession()?.email }}</p>
+      </div>
+    </div>
+
+    <nav class="admin-shell__nav">
+      @for (tab of tabs; track tab.key) {
+        <button type="button" [class.admin-shell__nav-button--active]="selectedTab === tab.key" (click)="setTab(tab.key)">
+          {{ tab.label }}
+        </button>
+      }
+    </nav>
+
+    <div class="admin-shell__sidebar-note">
+      <strong>Storage model</strong>
+      <p>All admin changes persist in this browser via local storage. There is no backend connected yet.</p>
+    </div>
+  </aside>
+
+  <section class="admin-shell__main">
+    <header class="admin-shell__topbar">
+      <div>
+        <p class="admin-shell__eyebrow">Separate /admin Workspace</p>
+        <h2>{{ currentTabTitle }}</h2>
+      </div>
+
+      <div class="admin-shell__topbar-actions">
+        @if (selectedTab !== 'profile') {
+          <button class="admin-shell__action admin-shell__action--light" type="button" (click)="discardChanges()">Discard Draft</button>
+          <button class="admin-shell__action admin-shell__action--accent" type="button" (click)="saveContent()">Save Changes</button>
+        }
+        <button class="admin-shell__action admin-shell__action--dark" type="button" (click)="logout()">Logout</button>
+      </div>
+    </header>
+
+    @if (selectedTab === 'dashboard') {
+      <section class="admin-shell__dashboard-grid">
+        <article class="admin-shell__metric">
+          <p>Pages</p>
+          <strong>{{ pageCount }}</strong>
+          <span>Public site destinations managed via admin.</span>
+        </article>
+
+        <article class="admin-shell__metric">
+          <p>Sections</p>
+          <strong>{{ sectionCount }}</strong>
+          <span>Editable page section tabs configured across the site.</span>
+        </article>
+
+        <article class="admin-shell__metric">
+          <p>Image Fields</p>
+          <strong>{{ imageCount }}</strong>
+          <span>Image or media references currently editable in the dataset.</span>
+        </article>
+
+        <article class="admin-shell__metric">
+          <p>Text Fields</p>
+          <strong>{{ textFieldCount }}</strong>
+          <span>Text blocks currently managed from the shared content tree.</span>
+        </article>
+      </section>
+
+      <section class="admin-shell__content-grid">
+        <article class="admin-shell__card">
+          <div class="admin-shell__card-head">
+            <h3>Quick Navigation</h3>
+            <p>Jump directly into the page editor tab and preview the public routes.</p>
+          </div>
+
+          <div class="admin-shell__quick-links">
+            @for (page of pageConfigs; track page.key) {
+              <button type="button" class="admin-shell__quick-link" (click)="setTab('pages'); setSelectedPage(page.key)">
+                <strong>{{ page.label }}</strong>
+                <span>{{ page.description }}</span>
+              </button>
+            }
+          </div>
+        </article>
+
+        <article class="admin-shell__card">
+          <div class="admin-shell__card-head">
+            <h3>What This Admin Controls</h3>
+            <p>Current scope of the separate `/admin` route implementation.</p>
+          </div>
+
+          <ul class="admin-shell__bullet-list">
+            <li>Dashboard overview with page, section, image, and content metrics.</li>
+            <li>Pages tab with page-level tabs and section-level tabs for each route.</li>
+            <li>Settings editor for brand, navigation, header action, footer links, and contact details.</li>
+            <li>Admin profile editor for credentials, display identity, and support details.</li>
+            <li>Management tools for export, import, draft reset, and admin reset.</li>
+          </ul>
+        </article>
+      </section>
+    }
+
+    @if (selectedTab === 'pages') {
+      <section class="admin-shell__card">
+        <div class="admin-shell__card-head">
+          <h3>All Pages</h3>
+          <p>Select a public page, then switch between its editable section tabs.</p>
+        </div>
+
+        <div class="admin-shell__tab-row">
+          @for (page of pageConfigs; track page.key) {
+            <button type="button" [class.admin-shell__tab-button--active]="selectedPageKey === page.key" (click)="setSelectedPage(page.key)">
+              {{ page.label }}
+            </button>
+          }
+        </div>
+
+        <div class="admin-shell__page-meta">
+          <div>
+            <strong>{{ activePage.label }}</strong>
+            <p>{{ activePage.description }}</p>
+          </div>
+          <a [href]="activePage.route" target="_blank" rel="noreferrer">Preview Page</a>
+        </div>
+
+        <div class="admin-shell__tab-row admin-shell__tab-row--sub">
+          @for (section of activePage.sections; track section.key) {
+            <button
+              type="button"
+              [class.admin-shell__tab-button--active]="selectedSectionKey === section.key"
+              (click)="setSelectedSection(section.key)"
+            >
+              {{ section.label }}
+            </button>
+          }
+        </div>
+
+        <div class="admin-shell__editor-wrap">
+          <app-admin-content-editor
+            [depth]="0"
+            [keyOrIndex]="selectedSectionParentKey"
+            [label]="selectedSectionLabel"
+            [model]="selectedSectionModel"
+            [parent]="selectedSectionParent"
+            [prototype]="selectedSectionPrototype"
+            [rawKey]="selectedSectionParentKey"
+          ></app-admin-content-editor>
+        </div>
+      </section>
+    }
+
+    @if (selectedTab === 'settings') {
+      <section class="admin-shell__card">
+        <div class="admin-shell__card-head">
+          <h3>Site Settings</h3>
+          <p>Control navigation, header actions, footer links, contact details, and social links.</p>
+        </div>
+
+        <div class="admin-shell__editor-wrap">
+          <app-admin-content-editor
+            [depth]="0"
+            [keyOrIndex]="'site'"
+            [label]="'Site Settings'"
+            [model]="draft.site"
+            [parent]="draft"
+            [prototype]="defaultContent.site"
+            [rawKey]="'site'"
+          ></app-admin-content-editor>
+        </div>
+      </section>
+    }
+
+    @if (selectedTab === 'profile') {
+      <section class="admin-shell__card">
+        <div class="admin-shell__card-head">
+          <h3>Admin Profile</h3>
+          <p>Update the admin identity, login credentials, and support contact details.</p>
+        </div>
+
+        <form class="admin-shell__profile-form" (ngSubmit)="saveProfile()">
+          <label>
+            <span>Full Name</span>
+            <input [(ngModel)]="profileDraft.fullName" name="fullName" type="text" required />
+          </label>
+
+          <label>
+            <span>Email</span>
+            <input [(ngModel)]="profileDraft.email" name="email" type="email" required />
+          </label>
+
+          <label>
+            <span>Role</span>
+            <input [(ngModel)]="profileDraft.role" name="role" type="text" required />
+          </label>
+
+          <label>
+            <span>Phone</span>
+            <input [(ngModel)]="profileDraft.phone" name="phone" type="tel" required />
+          </label>
+
+          <label>
+            <span>Avatar Label</span>
+            <input [(ngModel)]="profileDraft.avatarLabel" maxlength="3" name="avatarLabel" type="text" required />
+          </label>
+
+          <label class="admin-shell__profile-form--wide">
+            <span>Bio</span>
+            <textarea [(ngModel)]="profileDraft.bio" name="bio" rows="4"></textarea>
+          </label>
+
+          <label>
+            <span>Password</span>
+            <input [(ngModel)]="profileDraft.password" name="password" type="text" required />
+          </label>
+
+          <div class="admin-shell__profile-actions">
+            <button class="admin-shell__action admin-shell__action--accent" type="submit">Save Profile</button>
+            <button class="admin-shell__action admin-shell__action--light" type="button" (click)="resetProfile()">Reset Admin</button>
+          </div>
+        </form>
+      </section>
+    }
+
+    @if (selectedTab === 'management') {
+      <section class="admin-shell__content-grid">
+        <article class="admin-shell__card">
+          <div class="admin-shell__card-head">
+            <h3>Backup and Export</h3>
+            <p>Download the full editable content tree as JSON.</p>
+          </div>
+
+          <button class="admin-shell__action admin-shell__action--accent" type="button" (click)="downloadExport()">Download JSON Backup</button>
+        </article>
+
+        <article class="admin-shell__card">
+          <div class="admin-shell__card-head">
+            <h3>Import from File</h3>
+            <p>Upload a previously exported JSON file to restore or replace the current content.</p>
+          </div>
+
+          <input accept="application/json" type="file" (change)="handleImportFile($event)" />
+        </article>
+
+        <article class="admin-shell__card admin-shell__card--wide">
+          <div class="admin-shell__card-head">
+            <h3>Import from JSON</h3>
+            <p>Paste a content payload directly and apply it to the site.</p>
+          </div>
+
+          <textarea [(ngModel)]="importPayload" rows="10"></textarea>
+          <button class="admin-shell__action admin-shell__action--dark" type="button" (click)="importFromTextarea()">Apply JSON Payload</button>
+        </article>
+
+        <article class="admin-shell__card">
+          <div class="admin-shell__card-head">
+            <h3>Reset Site Content</h3>
+            <p>Restore all pages, settings, and image references to the seeded defaults.</p>
+          </div>
+
+          <button class="admin-shell__action admin-shell__action--light" type="button" (click)="resetSiteContent()">Restore Defaults</button>
+        </article>
+      </section>
+    }
+  </section>
+</main>

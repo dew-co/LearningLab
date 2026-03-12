@@ -1,30 +1,33 @@
 <main appMotionPage class="results-page">
-  <app-site-header [actions]="actions" [brand]="brand" [navItems]="navItems"></app-site-header>
+  <app-site-header
+    [actions]="content().site.headerActions"
+    [brand]="content().site.brandName"
+    [navItems]="content().site.navItems"
+  ></app-site-header>
 
   <section class="results-page__hero">
     <div class="section-shell results-page__hero-shell" data-immediate="true" data-reveal="hero">
-      <p class="results-page__eyebrow">Hall of Fame 2024</p>
-      <h1>Real Students. <span>Real Success.</span> Real Results.</h1>
-      <p class="results-page__copy">
-        Celebrating the consistent progress of our students achieved through structured live classes on our app and website.
-      </p>
-      <p class="results-page__subcopy">
-        Our commitment is to honest, data-driven results and student growth. We believe every child has the potential to excel
-        with the right guidance and environment.
-      </p>
-      <a routerLink="/courses">Explore Our Methodology</a>
+      <p class="results-page__eyebrow">{{ content().results.hero.eyebrow }}</p>
+      <h1>
+        {{ content().results.hero.titlePrefix }}
+        <span>{{ content().results.hero.titleAccent }}</span>
+        {{ content().results.hero.titleSuffix }}
+      </h1>
+      <p class="results-page__copy">{{ content().results.hero.description }}</p>
+      <p class="results-page__subcopy">{{ content().results.hero.subdescription }}</p>
+      <a routerLink="/courses">{{ content().results.hero.ctaLabel }}</a>
     </div>
   </section>
 
   <section class="results-page__section">
     <div class="section-shell">
       <div class="results-page__section-head" data-reveal="fade-up">
-        <h2>Classes 6-10 | Foundation Achievers</h2>
-        <p>Building strong conceptual foundations for future competitive success.</p>
+        <h2>{{ content().results.foundationSection.title }}</h2>
+        <p>{{ content().results.foundationSection.description }}</p>
       </div>
 
       <div class="results-page__achiever-grid">
-        @for (student of achievers; track student.name; let index = $index) {
+        @for (student of content().results.foundationSection.items; track student.name; let index = $index) {
           <article class="results-page__achiever-card" [attr.data-delay]="index * 0.08" data-reveal="fade-up">
             <img [alt]="student.name + ' portrait'" [src]="student.image" />
             <div class="results-page__achiever-body">
@@ -48,12 +51,12 @@
   <section class="results-page__section results-page__section--tight">
     <div class="section-shell">
       <div class="results-page__section-head" data-reveal="fade-up">
-        <h2>Classes 6-10 | Foundation Achievers</h2>
-        <p>Building strong conceptual foundations for future competitive success.</p>
+        <h2>{{ content().results.featuredSection.title }}</h2>
+        <p>{{ content().results.featuredSection.description }}</p>
       </div>
 
       <div class="results-page__achiever-grid">
-        @for (student of achievers; track student.name + '-repeat'; let index = $index) {
+        @for (student of content().results.featuredSection.items; track student.name + '-repeat'; let index = $index) {
           <article class="results-page__achiever-card" [attr.data-delay]="index * 0.08" data-reveal="fade-up">
             <img [alt]="student.name + ' portrait repeat'" [src]="student.image" />
             <div class="results-page__achiever-body">
@@ -77,12 +80,12 @@
   <section class="results-page__section results-page__section--centered">
     <div class="section-shell">
       <div class="results-page__section-head results-page__section-head--center" data-reveal="fade-up">
-        <h2>IIT-JEE | Competitive Excellence</h2>
-        <p>Advanced mentoring and strategy for India toughest engineering exams.</p>
+        <h2>{{ content().results.jeeSection.title }}</h2>
+        <p>{{ content().results.jeeSection.description }}</p>
       </div>
 
       <div class="results-page__rank-grid">
-        @for (rank of jeeRanks; track rank.name; let index = $index) {
+        @for (rank of content().results.jeeSection.items; track rank.name; let index = $index) {
           <article class="results-page__rank-card" [attr.data-delay]="index * 0.08" data-reveal="zoom">
             <p class="results-page__rank-badge">{{ rank.badge }}</p>
             <div class="results-page__rank-avatar">
@@ -105,13 +108,11 @@
   <section class="results-page__section">
     <div class="section-shell results-page__drivers">
       <div class="results-page__drivers-copy" data-reveal="fade-right">
-        <h2>How These Exceptional Results Are Achieved</h2>
-        <p>
-          We do not just teach; we transform the way students learn through a meticulously designed 6-pillar ecosystem.
-        </p>
+        <h2>{{ content().results.driversSection.title }}</h2>
+        <p>{{ content().results.driversSection.description }}</p>
 
         <div class="results-page__driver-grid">
-          @for (driver of drivers; track driver.title; let index = $index) {
+          @for (driver of content().results.driversSection.items; track driver.title; let index = $index) {
             <article class="results-page__driver-card">
               <span>
                 @switch (index) {
@@ -133,7 +134,7 @@
       </div>
 
       <div class="results-page__drivers-media" data-delay="0.12" data-parallax-root data-reveal="zoom">
-        <img alt="Students learning with a mentor" data-parallax="18" src="design/mentor-a.jpg" />
+        <img [alt]="content().results.driversSection.imageAlt" data-parallax="18" [src]="content().results.driversSection.imageSrc" />
         <button aria-label="Play success story" class="results-page__drivers-play" type="button">
           <i aria-hidden="true" class="fa-solid fa-play"></i>
         </button>
@@ -143,16 +144,16 @@
 
   <section class="results-page__cta">
     <div class="section-shell results-page__cta-shell" data-reveal="zoom">
-      <h2>Experience our teaching system firsthand.</h2>
-      <p>Join thousands of students who have transformed their grades and boosted their confidence. Start your success story today.</p>
+      <h2>{{ content().results.cta.title }}</h2>
+      <p>{{ content().results.cta.description }}</p>
 
       <div class="results-page__cta-actions">
-        <a class="results-page__button results-page__button--light" routerLink="/contact-us">Book Free Demo Class</a>
-        <a class="results-page__button results-page__button--outline" routerLink="/contact-us">Speak to a Counselor</a>
-        <a class="results-page__button results-page__button--green" routerLink="/contact-us">WhatsApp Enquiry</a>
+        <a class="results-page__button results-page__button--light" routerLink="/contact-us">{{ content().results.cta.primaryLabel }}</a>
+        <a class="results-page__button results-page__button--outline" routerLink="/contact-us">{{ content().results.cta.secondaryLabel }}</a>
+        <a class="results-page__button results-page__button--green" routerLink="/contact-us">{{ content().results.cta.tertiaryLabel }}</a>
       </div>
 
-      <small>Over 50,000 students mentored since 2015</small>
+      <small>{{ content().results.cta.note }}</small>
     </div>
   </section>
 </main>
