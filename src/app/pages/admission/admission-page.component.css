@@ -1,0 +1,531 @@
+:host {
+  display: block;
+}
+
+.admission-page {
+  min-height: 100vh;
+  background: #f8f7f5;
+  padding-bottom: 4rem;
+}
+
+.admission-page .section-shell {
+  width: min(100%, 62rem);
+}
+
+.admission-page__hero,
+.admission-page__section,
+.admission-page__cta {
+  padding-inline: 1.5rem;
+}
+
+.admission-page__hero {
+  padding-top: 2.75rem;
+  padding-bottom: 2.5rem;
+}
+
+.admission-page__hero-shell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+}
+
+.admission-page__eyebrow {
+  margin: 0;
+  border-radius: 999px;
+  background: #f1e5d6;
+  padding: 0.5rem 1rem;
+  color: #f48c25;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admission-page__hero h1 {
+  max-width: 48rem;
+  margin: 0;
+  color: #181411;
+  font-size: clamp(3rem, 7vw, 3.75rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.09rem;
+}
+
+.admission-page__copy {
+  max-width: 43rem;
+  margin: 0;
+  color: #927a62;
+  font-size: 1.125rem;
+  line-height: 1.45;
+}
+
+.admission-page__section {
+  padding-bottom: 4rem;
+}
+
+.admission-page__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(18rem, 0.85fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.admission-page__form-card,
+.admission-page__steps-card,
+.admission-page__help-card,
+.admission-page__promo-card,
+.admission-page__cta-shell {
+  border: 1px solid #dfd5cb;
+  border-radius: 1rem;
+}
+
+.admission-page__form-card {
+  background: #fff;
+  padding: 2rem;
+  box-shadow: 0 20px 40px rgba(17, 14, 12, 0.05);
+}
+
+.admission-page__form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.admission-page__form-section {
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #eee5db;
+}
+
+.admission-page__form-section:last-of-type {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.admission-page__section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.admission-page__section-head h2 {
+  margin: 0;
+  color: #181411;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.admission-page__section-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: none;
+  color: #f48c25;
+  font-size: 1.05rem;
+}
+
+.admission-page__field-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.admission-page__field-grid--two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admission-page__field {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.admission-page__field--full {
+  grid-column: 1 / -1;
+}
+
+.admission-page__field span {
+  color: #2b241f;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.admission-page__field input,
+.admission-page__field select {
+  width: 100%;
+  min-height: 3.1rem;
+  border: 1px solid #ddd2c7;
+  border-radius: 0.65rem;
+  background: #fff;
+  padding: 0 1rem;
+  color: #181411;
+  font-size: 0.95rem;
+}
+
+.admission-page__field input::placeholder,
+.admission-page__field select {
+  color: #818798;
+}
+
+.admission-page__field select {
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #6b7280 50%),
+    linear-gradient(135deg, #6b7280 50%, transparent 50%);
+  background-position:
+    calc(100% - 1.15rem) 1.35rem,
+    calc(100% - 0.8rem) 1.35rem;
+  background-repeat: no-repeat;
+  background-size: 0.42rem 0.42rem, 0.42rem 0.42rem;
+  padding-right: 2.75rem;
+}
+
+.admission-page__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  min-height: 3.8rem;
+  border: 0;
+  border-radius: 0.85rem;
+  background: #f48c25;
+  color: #fff;
+  box-shadow: 0 18px 32px rgba(244, 140, 37, 0.22);
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admission-page__submit-arrow {
+  font-size: 0.95rem;
+}
+
+.admission-page__response-note {
+  margin: -0.4rem 0 0;
+  color: #987e67;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.admission-page__privacy-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  border-radius: 0.8rem;
+  background: #f8f5f1;
+}
+
+.admission-page__privacy-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  color: #22a651;
+  font-size: 1.05rem;
+}
+
+.admission-page__privacy-card p {
+  margin: 0;
+  color: #8a7560;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.admission-page__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.admission-page__steps-card,
+.admission-page__help-card {
+  background: #fff;
+  padding: 1.5rem;
+}
+
+.admission-page__steps-card h2,
+.admission-page__help-card h2 {
+  margin: 0 0 1.25rem;
+  color: #181411;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.admission-page__steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admission-page__step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.9rem;
+  align-items: start;
+}
+
+.admission-page__step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 999px;
+  border: 2px solid #d7d7d7;
+  color: #b4b4b4;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.admission-page__step--solid .admission-page__step-number {
+  border-color: #f48c25;
+  background: #f48c25;
+  color: #fff;
+}
+
+.admission-page__step--outline .admission-page__step-number {
+  border-color: #f48c25;
+  color: #f48c25;
+}
+
+.admission-page__step h3,
+.admission-page__promo-copy h3 {
+  margin: 0;
+  color: #181411;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.admission-page__step p,
+.admission-page__help-card p,
+.admission-page__promo-copy p {
+  margin: 0.25rem 0 0;
+  color: #8a7560;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.admission-page__help-card {
+  background: #faf4ec;
+}
+
+.admission-page__help-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 100%;
+  min-height: 3rem;
+  border-radius: 0.7rem;
+  padding: 0 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.admission-page__help-action + .admission-page__help-action {
+  margin-top: 0.8rem;
+}
+
+.admission-page__help-action i {
+  flex: none;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.admission-page__help-action--green i {
+  font-size: 1.15rem;
+}
+
+.admission-page__help-action--light {
+  border: 1px solid #ddd2c7;
+  background: #fff;
+  color: #181411;
+}
+
+.admission-page__help-action--green {
+  background: #2ecc58;
+  color: #fff;
+}
+
+.admission-page__promo-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 10.8rem;
+  background: #181411;
+}
+
+.admission-page__promo-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.7);
+}
+
+.admission-page__promo-copy {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1rem;
+  background: linear-gradient(180deg, transparent, rgba(12, 9, 8, 0.9));
+}
+
+.admission-page__promo-copy h3,
+.admission-page__promo-copy p {
+  color: #fff;
+}
+
+.admission-page__cta {
+  padding-inline: 1.5rem;
+}
+
+.admission-page__cta-shell {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 4rem 2rem;
+  background: #fff;
+  text-align: center;
+}
+
+.admission-page__cta-shell::before,
+.admission-page__cta-shell::after {
+  content: "";
+  position: absolute;
+  width: 7.5rem;
+  height: 7.5rem;
+  border-radius: 999px;
+  background: rgba(244, 140, 37, 0.1);
+}
+
+.admission-page__cta-shell::before {
+  right: -2.75rem;
+  top: -2.5rem;
+}
+
+.admission-page__cta-shell::after {
+  left: -2.75rem;
+  bottom: -4rem;
+}
+
+.admission-page__cta h2,
+.admission-page__cta p,
+.admission-page__cta-actions {
+  position: relative;
+  z-index: 1;
+}
+
+.admission-page__cta h2 {
+  margin: 0;
+  color: #181411;
+  font-size: clamp(2.2rem, 5vw, 3rem);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.admission-page__cta p {
+  max-width: 40rem;
+  margin: 0;
+  color: #8a7560;
+  font-size: 1.15rem;
+  line-height: 1.5;
+}
+
+.admission-page__cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.admission-page__cta-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 15rem;
+  min-height: 3.4rem;
+  border-radius: 0.85rem;
+  padding: 0 1.8rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.admission-page__cta-button--accent {
+  background: #f48c25;
+  color: #fff;
+}
+
+.admission-page__cta-button--ghost {
+  color: #181411;
+}
+
+@media (max-width: 960px) {
+  .admission-page__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admission-page__sidebar {
+    order: 2;
+  }
+}
+
+@media (max-width: 720px) {
+  .admission-page {
+    padding-bottom: 2.5rem;
+  }
+
+  .admission-page__hero,
+  .admission-page__section,
+  .admission-page__cta {
+    padding-inline: 1rem;
+  }
+
+  .admission-page__hero h1 {
+    font-size: clamp(2.5rem, 12vw, 3.35rem);
+  }
+
+  .admission-page__copy {
+    font-size: 1rem;
+  }
+
+  .admission-page__form-card,
+  .admission-page__steps-card,
+  .admission-page__help-card {
+    padding: 1.25rem;
+  }
+
+  .admission-page__field-grid--two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admission-page__cta-shell {
+    padding: 3rem 1.25rem;
+  }
+
+  .admission-page__cta p {
+    font-size: 1rem;
+  }
+
+  .admission-page__cta-actions {
+    width: 100%;
+  }
+
+  .admission-page__cta-button {
+    width: 100%;
+  }
+}

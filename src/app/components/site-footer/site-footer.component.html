@@ -1,0 +1,95 @@
+<footer appMotionPage class="site-footer">
+  <div class="section-shell site-footer__shell">
+    <div class="site-footer__top">
+      <div class="site-footer__brand-block" data-reveal="fade-right">
+        <a class="site-footer__brand" routerLink="/home" aria-label="Go to home">
+          <span class="site-footer__brand-mark" aria-hidden="true">
+            <i class="fa-solid fa-book-open-reader"></i>
+          </span>
+          <span class="site-footer__brand-name">{{ brand() }}</span>
+        </a>
+
+        <p class="site-footer__description">{{ description() }}</p>
+      </div>
+
+      <div class="site-footer__column" data-delay="0.06" data-reveal="fade-up">
+        <p class="site-footer__eyebrow">Quick Links</p>
+
+        <nav class="site-footer__link-list" aria-label="Footer quick links">
+          @for (link of quickLinks(); track link.label) {
+            @if (link.type === 'href') {
+              <a
+                class="site-footer__link"
+                [href]="link.path"
+                [attr.target]="link.external ? '_blank' : null"
+                [attr.rel]="link.external ? 'noreferrer' : null"
+              >
+                {{ link.label }}
+              </a>
+            } @else {
+              <a class="site-footer__link" [routerLink]="link.path">{{ link.label }}</a>
+            }
+          }
+        </nav>
+      </div>
+
+      <div class="site-footer__column" data-delay="0.12" data-reveal="fade-up">
+        <p class="site-footer__eyebrow">Contact Us</p>
+
+        <div class="site-footer__contact-list">
+          @for (item of contactItems(); track item.value) {
+            <div class="site-footer__contact-item">
+              <span class="site-footer__contact-icon" aria-hidden="true">
+                <i [class]="item.iconClass"></i>
+              </span>
+
+              @if (item.href) {
+                <a
+                  class="site-footer__contact-value"
+                  [href]="item.href"
+                  [attr.target]="item.external ? '_blank' : null"
+                  [attr.rel]="item.external ? 'noreferrer' : null"
+                >
+                  {{ item.value }}
+                </a>
+              } @else {
+                <p class="site-footer__contact-value">{{ item.value }}</p>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="site-footer__column site-footer__column--social" data-delay="0.18" data-reveal="fade-left">
+        <p class="site-footer__eyebrow">Follow Us</p>
+
+        <div class="site-footer__social-list">
+          @for (item of socialLinks(); track item.label) {
+            <a
+              class="site-footer__social-link"
+              data-parallax="10"
+              [href]="item.href"
+              target="_blank"
+              rel="noreferrer"
+              [attr.aria-label]="item.label"
+            >
+              <i [class]="item.iconClass"></i>
+            </a>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="site-footer__bottom" data-delay="0.22" data-reveal="fade-up">
+      <p class="site-footer__copyright">
+        &copy; {{ year }} {{ brand() }} Private Limited. All rights reserved.
+      </p>
+
+      <div class="site-footer__legal">
+        @for (link of legalLinks(); track link.label) {
+          <a class="site-footer__legal-link" [routerLink]="link.path">{{ link.label }}</a>
+        }
+      </div>
+    </div>
+  </div>
+</footer>

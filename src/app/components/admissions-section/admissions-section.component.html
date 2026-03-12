@@ -1,0 +1,24 @@
+<section class="newsletter-section" id="admissions">
+  <div class="section-shell">
+    <div class="newsletter-card" data-parallax-root>
+      <div class="newsletter-card__copy" data-reveal="fade-right">
+        <h2>
+          {{ newsletter().titlePrefix }}
+          <span>{{ newsletter().titleAccent }}</span>
+        </h2>
+        <p>{{ newsletter().description }}</p>
+      </div>
+
+      <form class="newsletter-card__form" data-delay="0.08" data-reveal="fade-left">
+        <label class="newsletter-card__field">
+          <i aria-hidden="true" class="fa-regular fa-envelope"></i>
+          <input [placeholder]="newsletter().inputPlaceholder" type="email" />
+        </label>
+
+        <button type="button">{{ newsletter().buttonLabel }}</button>
+      </form>
+
+      <p class="newsletter-card__note" data-delay="0.14" data-reveal="fade-up">{{ newsletter().note }}</p>
+    </div>
+  </div>
+</section>

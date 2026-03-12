@@ -1,0 +1,38 @@
+<section class="hero-section">
+  <div class="section-shell hero-shell">
+    <div class="hero-copy" data-immediate="true" data-reveal="hero">
+      <p class="hero-kicker">{{ hero().eyebrow }}</p>
+
+      <h1 class="hero-title">
+        {{ hero().titlePrefix }}
+        <span class="hero-accent">{{ hero().titleAccent }}</span>
+        {{ hero().titleSuffix }}
+      </h1>
+
+      <p class="hero-description">{{ hero().description }}</p>
+
+      <div class="hero-actions">
+        <a class="hero-button hero-button--filled" [href]="hero().primaryCtaHref">
+          <i aria-hidden="true" class="hero-button__icon fa-solid fa-file-lines"></i>
+          {{ hero().primaryCtaLabel }}
+        </a>
+
+        <a class="hero-button hero-button--outline" [href]="hero().secondaryCtaHref">
+          <i aria-hidden="true" class="hero-button__icon fa-solid fa-mobile-screen-button"></i>
+          {{ hero().secondaryCtaLabel }}
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-visual" data-delay="0.14" data-immediate="true" data-parallax-root data-reveal="zoom">
+      <span class="hero-orb hero-orb--center" data-parallax="26"></span>
+      <img
+        [alt]="hero().imageAlt"
+        class="hero-image"
+        data-parallax="18"
+        loading="eager"
+        [src]="hero().imageSrc"
+      />
+    </div>
+  </div>
+</section>

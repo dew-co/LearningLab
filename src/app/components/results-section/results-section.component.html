@@ -1,0 +1,27 @@
+<section class="testimonials-section" id="results">
+  <div class="section-shell">
+    <div class="testimonials-section__intro" data-reveal="fade-up">
+      <h2>
+        What Our
+        <span>Students Say</span>
+      </h2>
+      <p>Real stories from students who achieved their dreams with LearningLab.</p>
+    </div>
+
+    <div class="testimonials-section__grid">
+      @for (testimonial of testimonials(); track testimonial.name; let index = $index) {
+        <article class="testimonial-card" [attr.data-delay]="index * 0.08" data-reveal="fade-up">
+          <div class="testimonial-card__header">
+            <span class="testimonial-card__avatar" aria-hidden="true">{{ testimonial.avatarInitials }}</span>
+            <div>
+              <h3>{{ testimonial.name }}</h3>
+              <p>{{ testimonial.detail }}</p>
+            </div>
+          </div>
+
+          <p class="testimonial-card__quote">"{{ testimonial.quote }}"</p>
+        </article>
+      }
+    </div>
+  </div>
+</section>

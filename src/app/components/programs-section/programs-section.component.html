@@ -1,0 +1,45 @@
+<section class="pricing-section" id="programs">
+  <div class="section-shell">
+    <div class="pricing-section__intro" data-reveal="fade-up">
+      <h2>
+        Choose Your
+        <span>Learning Path</span>
+      </h2>
+      <p>Flexible subscription plans tailored to your academic goals and learning pace.</p>
+    </div>
+
+    <div class="pricing-section__grid">
+      @for (plan of plans(); track plan.name; let index = $index) {
+        <article
+          class="pricing-card"
+          [attr.data-delay]="index * 0.08"
+          [attr.data-reveal]="plan.featured ? 'zoom' : 'fade-up'"
+          [class.pricing-card--featured]="plan.featured"
+        >
+          @if (plan.badge) {
+            <p class="pricing-card__badge">{{ plan.badge }}</p>
+          }
+
+          <div class="pricing-card__head">
+            <h3>{{ plan.name }}</h3>
+            <p class="pricing-card__price">
+              <span>{{ plan.price }}</span>
+              <small>{{ plan.billing }}</small>
+            </p>
+          </div>
+
+          <ul class="pricing-card__list">
+            @for (feature of plan.features; track feature) {
+              <li>
+                <i aria-hidden="true" class="fa-solid fa-circle-check"></i>
+                {{ feature }}
+              </li>
+            }
+          </ul>
+
+          <a href="#admissions">{{ plan.ctaLabel }}</a>
+        </article>
+      }
+    </div>
+  </div>
+</section>

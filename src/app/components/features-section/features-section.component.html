@@ -1,0 +1,28 @@
+<section class="features-section" id="features">
+  <div class="section-shell">
+    <p class="features-section__eyebrow" data-reveal="fade-up">WHY 50,000+ STUDENTS TRUST US</p>
+
+    <div class="features-section__grid">
+      @for (feature of features(); track feature.title; let index = $index) {
+        <article class="feature-card" [attr.data-delay]="index * 0.08" data-reveal="fade-up">
+          <span class="feature-card__icon" aria-hidden="true">
+            @switch (feature.icon) {
+              @case ('classes') {
+                <i class="fa-solid fa-video"></i>
+              }
+              @case ('mentors') {
+                <i class="fa-solid fa-chalkboard-user"></i>
+              }
+              @default {
+                <i class="fa-solid fa-lightbulb"></i>
+              }
+            }
+          </span>
+
+          <h2>{{ feature.title }}</h2>
+          <p>{{ feature.description }}</p>
+        </article>
+      }
+    </div>
+  </div>
+</section>

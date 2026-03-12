@@ -1,0 +1,26 @@
+<div appMotionPage class="legal-page">
+  <app-site-header [brand]="brand" [navItems]="navItems" [actions]="actions"></app-site-header>
+
+  <section class="legal-page__hero">
+    <div class="section-shell legal-page__hero-shell" data-immediate="true" data-reveal="hero">
+      <p class="legal-page__eyebrow">{{ document().eyebrow }}</p>
+      <h1>{{ document().title }}</h1>
+      <p class="legal-page__summary">{{ document().summary }}</p>
+      <p class="legal-page__updated">{{ document().updatedAt }}</p>
+    </div>
+  </section>
+
+  <section class="legal-page__content">
+    <div class="section-shell legal-page__content-shell">
+      @for (section of document().sections; track section.heading; let index = $index) {
+        <article class="legal-page__card" [attr.data-delay]="index * 0.08" data-reveal="fade-up">
+          <h2>{{ section.heading }}</h2>
+
+          @for (paragraph of section.body; track paragraph) {
+            <p>{{ paragraph }}</p>
+          }
+        </article>
+      }
+    </div>
+  </section>
+</div>

@@ -1,0 +1,148 @@
+<main appMotionPage class="page-shell contact-page">
+  <app-site-header [actions]="actions" [brand]="brand" [navItems]="navItems"></app-site-header>
+
+  <section class="contact-page__hero">
+    <div class="section-shell contact-page__hero-shell" data-immediate="true" data-reveal="hero">
+      <p class="contact-page__eyebrow"><i aria-hidden="true" class="fa-solid fa-headset"></i>Expert Academic Support</p>
+      <h1>Get in Touch with Our Experts</h1>
+      <p class="contact-page__copy">
+        We're here to guide you on your academic journey. Reach out for any queries or support regarding admissions, courses,
+        or technical help.
+      </p>
+
+      <div class="contact-page__hero-points">
+        <p><i aria-hidden="true" class="fa-solid fa-clock"></i>24/7 Portal Access</p>
+        <p><i aria-hidden="true" class="fa-solid fa-user-tie"></i>Expert Counselors</p>
+        <p><i aria-hidden="true" class="fa-solid fa-globe"></i>Nationwide Presence</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact-page__section">
+    <div class="section-shell contact-page__grid">
+      <article class="contact-page__form-card" data-reveal="fade-right">
+        <div class="contact-page__card-intro">
+          <h2>Quick Enquiry</h2>
+          <p>Fill in the details below and our academic counselors will reach out to you shortly.</p>
+        </div>
+
+        <form class="contact-page__form">
+          <label>
+            <span>Student Name</span>
+            <input placeholder="Enter your full name" type="text" />
+          </label>
+
+          <div class="contact-page__form-row">
+            <label>
+              <span>Class</span>
+              <select>
+                <option>Select Class</option>
+                <option>Class 6-8</option>
+                <option>Class 9-10</option>
+                <option>Class 11-12</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Exam Interest</span>
+              <select>
+                <option>Select Goal</option>
+                <option>Boards</option>
+                <option>IIT-JEE</option>
+                <option>Foundation</option>
+              </select>
+            </label>
+          </div>
+
+          <label>
+            <span>Phone Number</span>
+            <div class="contact-page__phone">
+              <small>+91</small>
+              <input placeholder="10-digit mobile number" type="tel" />
+            </div>
+          </label>
+
+          <button type="button">
+            <span>Request Call Back</span>
+            <i aria-hidden="true" class="contact-page__button-arrow fa-solid fa-arrow-right"></i>
+          </button>
+
+          <div class="contact-page__form-meta">
+            <i aria-hidden="true" class="contact-page__meta-dot fa-regular fa-clock"></i>
+            <small>We typically respond within 2 hours.</small>
+          </div>
+        </form>
+      </article>
+
+      <div class="contact-page__info">
+        @for (card of quickCards; track card.label; let index = $index) {
+          <article class="contact-page__info-card" [attr.data-delay]="index * 0.08" data-reveal="fade-left">
+            <span class="contact-page__info-icon-wrap" aria-hidden="true">
+              <i
+                class="contact-page__info-icon"
+                [class.fa-solid]="index !== 1"
+                [class.fa-brands]="index === 1"
+                [class.fa-phone]="index === 0"
+                [class.fa-whatsapp]="index === 1"
+                [class.fa-envelope]="index === 2"
+              ></i>
+            </span>
+            <div>
+              <p>{{ card.label }}</p>
+              <h3>{{ card.value }}</h3>
+            </div>
+          </article>
+        }
+
+        <article class="contact-page__office-card" data-delay="0.18" data-reveal="fade-left">
+          <p class="contact-page__office-label">Head Office</p>
+          <h3>LearningLab Academy Tower</h3>
+          <p>Plot 42, Knowledge Park III, Near Metro Station, New Delhi, 110001, India</p>
+          <strong>Available Nationwide via Online Access</strong>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact-page__section">
+    <div class="section-shell">
+      <div class="contact-page__section-head" data-reveal="fade-up">
+        <h2>Find us on the Map</h2>
+      </div>
+
+      <div class="contact-page__map" data-parallax-root data-reveal="zoom">
+        <iframe [src]="mapUrl" loading="lazy" title="LearningLab office map"></iframe>
+        <a
+          class="contact-page__map-card"
+          data-axis="x"
+          data-parallax="14"
+          [href]="mapExternalUrl"
+          rel="noreferrer"
+          target="_blank"
+        >
+          <i aria-hidden="true" class="contact-page__map-pin fa-solid fa-location-dot"></i>
+          <strong>LearningLab HQ</strong>
+          <p>Open in Google Maps</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact-page__cta">
+    <div class="section-shell contact-page__cta-shell" data-reveal="zoom">
+      <h2>Experience Live Learning Today</h2>
+      <p>Join thousands of students who are excelling with our live interactive classes. Book your slot now for a free demo session.</p>
+
+      <div class="contact-page__cta-actions">
+        <a class="contact-page__button contact-page__button--accent" routerLink="/contact-us">
+          <i aria-hidden="true" class="contact-page__cta-icon fa-solid fa-calendar-days"></i>
+          <span>Book Free Demo Class</span>
+        </a>
+        <a class="contact-page__button contact-page__button--light" routerLink="/live-classes">
+          <i aria-hidden="true" class="contact-page__cta-icon fa-solid fa-desktop"></i>
+          <span>Join Live via Web/App</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</main>

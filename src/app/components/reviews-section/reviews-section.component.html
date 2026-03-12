@@ -1,0 +1,34 @@
+<section class="faq-section" id="reviews">
+  <div class="section-shell faq-section__shell">
+    <div class="faq-section__intro" data-reveal="fade-up">
+      <h2>
+        Frequently Asked
+        <span>Questions</span>
+      </h2>
+      <p>Everything you need to know about our learning platform and courses.</p>
+    </div>
+
+    <div class="faq-section__list">
+      @for (faq of faqs(); track faq.question; let index = $index) {
+        <article class="faq-card" [attr.data-delay]="index * 0.06" [class.faq-card--expanded]="expandedIndex() === index" data-reveal="fade-up">
+          <button
+            class="faq-card__head"
+            type="button"
+            [attr.aria-controls]="'faq-answer-' + index"
+            [attr.aria-expanded]="expandedIndex() === index"
+            (click)="toggleFaq(index)"
+          >
+            <h3>{{ faq.question }}</h3>
+            <span aria-hidden="true">
+              <i class="fa-solid fa-chevron-down"></i>
+            </span>
+          </button>
+
+          @if (expandedIndex() === index) {
+            <p [id]="'faq-answer-' + index">{{ faq.answer }}</p>
+          }
+        </article>
+      }
+    </div>
+  </div>
+</section>

@@ -1,0 +1,36 @@
+<section class="faculty-section" id="mentors">
+  <div class="section-shell">
+    <div class="faculty-section__intro" data-reveal="fade-up">
+      <h2>
+        Meet Our
+        <span>Expert Faculty</span>
+      </h2>
+      <p>Learn from the best minds in the industry, dedicated to your academic success.</p>
+    </div>
+
+    <div class="faculty-section__grid">
+      @for (member of faculty(); track member.name; let index = $index) {
+        <article class="faculty-card" [attr.data-delay]="index * 0.08" data-reveal="fade-up">
+          <div class="faculty-card__placeholder" aria-hidden="true"></div>
+
+          <div class="faculty-card__body">
+            <h3>{{ member.name }}</h3>
+            <p class="faculty-card__role">{{ member.title }}</p>
+
+            <div class="faculty-card__meta">
+              <p>
+                <i aria-hidden="true" class="fa-solid fa-award"></i>
+                {{ member.credential }}
+              </p>
+
+              <p>
+                <i aria-hidden="true" class="fa-solid fa-clock"></i>
+                {{ member.experience }}
+              </p>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  </div>
+</section>

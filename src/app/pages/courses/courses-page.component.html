@@ -1,0 +1,148 @@
+<main appMotionPage class="courses-page">
+  <app-site-header [actions]="actions" [brand]="brand" [navItems]="navItems"></app-site-header>
+
+  <section class="courses-page__hero">
+    <div class="section-shell courses-page__hero-shell">
+      <div class="courses-page__hero-copy" data-immediate="true" data-reveal="hero">
+        <p class="courses-page__eyebrow">Expert Academic Coaching</p>
+        <h1>
+          Structured
+          <br />
+          Courses from
+          <br />
+          <span>Class 6 to IIT-JEE</span>
+        </h1>
+        <p>
+          Live classes, expert faculty, and app-based learning for a brighter academic future. Join thousands of successful
+          students.
+        </p>
+      </div>
+
+      <div class="courses-page__hero-media" data-delay="0.14" data-immediate="true" data-parallax-root data-reveal="zoom">
+        <img alt="Structured classroom coaching" data-parallax="18" src="design/mentor-b.jpg" />
+        <div class="courses-page__hero-stat" data-axis="x" data-parallax="14">
+          <strong>98% Success</strong>
+          <p>Board Exam Results</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="courses-page__section" id="foundation">
+    <div class="section-shell">
+      <div class="courses-page__section-head" data-reveal="fade-up">
+        <h2>Classes 6-10 Foundation Program</h2>
+        <p>Building a rock-solid base for competitive excellence early on.</p>
+      </div>
+
+      <div class="courses-page__foundation-grid">
+        @for (feature of foundationFeatures; track feature.title; let index = $index) {
+          <article class="courses-page__card" [attr.data-delay]="index * 0.08" data-reveal="fade-up">
+            @switch (index) {
+              @case (0) { <i aria-hidden="true" class="courses-page__icon fa-solid fa-video"></i> }
+              @case (1) { <i aria-hidden="true" class="courses-page__icon fa-solid fa-lightbulb"></i> }
+              @case (2) { <i aria-hidden="true" class="courses-page__icon fa-solid fa-list-check"></i> }
+              @case (3) { <i aria-hidden="true" class="courses-page__icon fa-solid fa-circle-play"></i> }
+              @case (4) { <i aria-hidden="true" class="courses-page__icon fa-solid fa-chart-line"></i> }
+              @default { <i aria-hidden="true" class="courses-page__icon fa-solid fa-mobile-screen-button"></i> }
+            }
+            <h3>{{ feature.title }}</h3>
+            <p>{{ feature.description }}</p>
+          </article>
+        }
+      </div>
+
+      <div class="courses-page__section-action" data-reveal="fade-up">
+        <a routerLink="/contact-us">Book a Free Demo Class</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="courses-page__section courses-page__section--split" id="dual-focus">
+    <div class="section-shell courses-page__split">
+      <div class="courses-page__track-grid">
+        @for (track of boardsTracks; track track.title; let index = $index) {
+          <article class="courses-page__track-card" [attr.data-delay]="index * 0.08" data-reveal="fade-up">
+            <h3>{{ track.title }}</h3>
+            <p>{{ track.description }}</p>
+          </article>
+        }
+      </div>
+
+      <div class="courses-page__split-copy" data-reveal="fade-left">
+        <p class="courses-page__micro">Grades 11-12</p>
+        <h2>Boards + Competitive Synergy</h2>
+        <p>
+          Master your school curriculum while simultaneously cracking national-level entrance exams. Our dual-focus pedagogy
+          ensures you do not have to choose between grades and goals.
+        </p>
+        <a routerLink="/contact-us">Talk to a Mentor</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="courses-page__section" id="jee">
+    <div class="section-shell courses-page__jee">
+      <div class="courses-page__jee-copy" data-reveal="fade-right">
+        <h2>
+          IIT-JEE <span>(Main &amp; Advanced)</span>
+        </h2>
+        <p>
+          An intensive program designed by former IITians to help you secure a seat in the nation's premier engineering institutes.
+        </p>
+
+        <div class="courses-page__jee-list">
+          @for (item of jeeHighlights; track item.title) {
+            <article>
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.description }}</p>
+            </article>
+          }
+        </div>
+
+        <a routerLink="/contact-us">Start Your IIT-JEE Journey</a>
+      </div>
+
+      <img alt="Student writing during advanced preparation" data-parallax="20" data-parallax-root data-reveal="zoom" src="design/mentor-a.jpg" />
+    </div>
+  </section>
+
+  <section class="courses-page__section courses-page__section--centered">
+    <div class="section-shell">
+      <div class="courses-page__section-head courses-page__section-head--center" data-reveal="fade-up">
+        <h2>Your Path to Excellence</h2>
+        <p>From building fundamentals in middle school to mastering competitive exams, we walk with you every step of the way.</p>
+      </div>
+
+      <div class="courses-page__path">
+        @for (step of pathSteps; track step.label; let index = $index) {
+          <article class="courses-page__path-step" [attr.data-delay]="index * 0.08" [class.courses-page__path-step--highlight]="step.highlight" data-reveal="fade-up">
+            <div class="courses-page__path-badge">
+              @if (step.highlight) {
+                <i aria-hidden="true" class="courses-page__path-icon fa-solid fa-trophy"></i>
+              } @else {
+                <span class="courses-page__path-number">{{ step.label }}</span>
+              }
+            </div>
+            <h3>{{ step.title }}</h3>
+            <p class="courses-page__path-meta">{{ step.subtitle }}</p>
+            <p class="courses-page__path-copy">{{ step.description }}</p>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="courses-page__cta">
+    <div class="section-shell courses-page__cta-shell" data-reveal="zoom">
+      <h2>Not Sure Which Course Is Right?</h2>
+      <p>Our academic counselors are here to help you design your ideal learning path.</p>
+
+      <div class="courses-page__cta-actions">
+        <a class="courses-page__button courses-page__button--accent" routerLink="/contact-us">Book Free Demo</a>
+        <a class="courses-page__button courses-page__button--light" routerLink="/contact-us">Speak to a Counselor</a>
+        <a class="courses-page__button courses-page__button--green" routerLink="/contact-us">WhatsApp Enquiry</a>
+      </div>
+    </div>
+  </section>
+</main>

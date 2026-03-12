@@ -1,0 +1,242 @@
+:host {
+  display: block;
+}
+
+.admission-thank-you-page {
+  min-height: 100vh;
+  background: #f8f7f5;
+}
+
+.admission-thank-you-page .section-shell {
+  width: min(100%, 62rem);
+}
+
+.admission-thank-you-page__hero {
+  position: relative;
+  overflow: hidden;
+  padding: 5rem 1.5rem 4rem;
+}
+
+.admission-thank-you-page__hero::before,
+.admission-thank-you-page__hero::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.admission-thank-you-page__hero::before {
+  right: -8rem;
+  top: 0;
+  width: 24rem;
+  height: 24rem;
+  border: 2.5rem solid rgba(244, 140, 37, 0.08);
+}
+
+.admission-thank-you-page__hero::after {
+  left: 14%;
+  top: 7rem;
+  width: 3rem;
+  height: 3rem;
+  border: 0.9rem solid rgba(244, 140, 37, 0.12);
+  transform: rotate(25deg);
+}
+
+.admission-thank-you-page__shell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.admission-thank-you-page__card {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 40rem);
+  border: 1px solid #e4dad0;
+  border-radius: 1rem;
+  background: #fff;
+  padding: 3rem;
+  box-shadow: 0 18px 45px rgba(18, 17, 15, 0.06);
+  text-align: center;
+}
+
+.admission-thank-you-page__success-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 5rem;
+  height: 5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 999px;
+  background: rgba(34, 166, 81, 0.18);
+  color: #22a651;
+  font-size: 2.4rem;
+}
+
+.admission-thank-you-page h1 {
+  margin: 0;
+  color: #181411;
+  font-size: clamp(2.4rem, 6vw, 3.4rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.07rem;
+}
+
+.admission-thank-you-page__copy {
+  max-width: 33rem;
+  margin: 1rem auto 0;
+  color: #667085;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.admission-thank-you-page__copy span {
+  color: #f48c25;
+  font-weight: 700;
+}
+
+.admission-thank-you-page__next-panel {
+  margin-top: 2.2rem;
+  border-radius: 0.9rem;
+  background: #f8f5f1;
+  padding: 1.5rem;
+  text-align: left;
+}
+
+.admission-thank-you-page__next-panel h2 {
+  margin: 0 0 1.3rem;
+  color: #181411;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.admission-thank-you-page__next-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.admission-thank-you-page__next-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.admission-thank-you-page__next-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.55rem;
+  height: 2.55rem;
+  border-radius: 999px;
+  background: #f2e3d3;
+  color: #f48c25;
+}
+
+.admission-thank-you-page__next-icon i {
+  font-size: 1rem;
+}
+
+.admission-thank-you-page__next-item h3 {
+  margin: 0;
+  color: #181411;
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.admission-thank-you-page__next-item p {
+  margin: 0.15rem 0 0;
+  color: #667085;
+  line-height: 1.45;
+}
+
+.admission-thank-you-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.admission-thank-you-page__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 13.5rem;
+  min-height: 3.2rem;
+  border-radius: 0.75rem;
+  padding: 0 1.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.admission-thank-you-page__button--accent {
+  background: #f48c25;
+  color: #fff;
+  box-shadow: 0 14px 24px rgba(244, 140, 37, 0.22);
+}
+
+.admission-thank-you-page__button--light {
+  border: 2px solid #f48c25;
+  color: #f48c25;
+}
+
+.admission-thank-you-page__footer {
+  margin-top: 2rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid #ebe2d8;
+}
+
+.admission-thank-you-page__signals {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.admission-thank-you-page__signals span {
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 999px;
+  background: #a5aebd;
+  opacity: 0.9;
+}
+
+.admission-thank-you-page__back-link {
+  color: #f48c25;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.admission-thank-you-page__trust {
+  position: relative;
+  z-index: 1;
+  margin: 1.75rem 0 0;
+  color: #667085;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .admission-thank-you-page__hero {
+    padding: 3rem 1rem;
+  }
+
+  .admission-thank-you-page__card {
+    padding: 2rem 1.25rem;
+  }
+
+  .admission-thank-you-page h1 {
+    font-size: clamp(2.15rem, 11vw, 3rem);
+  }
+
+  .admission-thank-you-page__actions {
+    flex-direction: column;
+  }
+
+  .admission-thank-you-page__button {
+    width: 100%;
+  }
+}

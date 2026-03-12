@@ -1,0 +1,59 @@
+:host {
+  position: fixed;
+  right: clamp(1rem, 2.4vw, 1.6rem);
+  bottom: clamp(1rem, 2.4vw, 1.6rem);
+  z-index: 40;
+}
+
+.scroll-top-button {
+  position: relative;
+  display: inline-flex;
+  width: 3.5rem;
+  height: 3.5rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #f49a34 0%, #f28d23 100%);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 18px 36px rgba(242, 141, 35, 0.28);
+  transition:
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.scroll-top-button:hover {
+  background: linear-gradient(180deg, #f3a448 0%, #df7d18 100%);
+  box-shadow: 0 22px 42px rgba(242, 141, 35, 0.34);
+}
+
+.scroll-top-button:focus-visible {
+  outline: 3px solid rgba(242, 141, 35, 0.28);
+  outline-offset: 3px;
+}
+
+.scroll-top-button i {
+  position: relative;
+  z-index: 1;
+  font-size: 1rem;
+}
+
+.scroll-top-button__glow {
+  position: absolute;
+  inset: 0.35rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+@media (max-width: 640px) {
+  :host {
+    right: 0.85rem;
+    bottom: 0.85rem;
+  }
+
+  .scroll-top-button {
+    width: 3.1rem;
+    height: 3.1rem;
+  }
+}

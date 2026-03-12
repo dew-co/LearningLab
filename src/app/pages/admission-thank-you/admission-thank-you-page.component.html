@@ -1,0 +1,55 @@
+<main appMotionPage class="page-shell admission-thank-you-page">
+  <app-site-header [actions]="actions" [brand]="brand" [navItems]="navItems"></app-site-header>
+
+  <section class="admission-thank-you-page__hero">
+    <div class="section-shell admission-thank-you-page__shell">
+      <article class="admission-thank-you-page__card" data-immediate="true" data-reveal="hero">
+        <span class="admission-thank-you-page__success-icon" aria-hidden="true">
+          <i class="fa-solid fa-circle-check"></i>
+        </span>
+
+        <h1>Thank You for Reaching Out!</h1>
+        <p class="admission-thank-you-page__copy">
+          We've received your request and our academic counselor will call you back within <span>24 hours</span>.
+        </p>
+
+        <section class="admission-thank-you-page__next-panel">
+          <h2>What's Next?</h2>
+
+          <div class="admission-thank-you-page__next-list">
+            @for (step of nextSteps; track step.title; let index = $index) {
+              <article class="admission-thank-you-page__next-item" [attr.data-delay]="0.14 + (index * 0.08)" data-reveal="fade-up">
+                <span aria-hidden="true" class="admission-thank-you-page__next-icon">
+                  <i [class]="'fa-solid ' + (step.icon === 'download' ? 'fa-download' : 'fa-circle-play')"></i>
+                </span>
+
+                <div>
+                  <h3>{{ step.title }}</h3>
+                  <p>{{ step.description }}</p>
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+
+        <div class="admission-thank-you-page__actions">
+          <a class="admission-thank-you-page__button admission-thank-you-page__button--accent" routerLink="/courses">Explore Courses</a>
+          <a class="admission-thank-you-page__button admission-thank-you-page__button--light" routerLink="/live-classes">Download App</a>
+        </div>
+
+        <div class="admission-thank-you-page__footer">
+          <div class="admission-thank-you-page__signals">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+
+          <a class="admission-thank-you-page__back-link" routerLink="/home">Back to Home</a>
+        </div>
+      </article>
+
+      <p class="admission-thank-you-page__trust" data-delay="0.18" data-reveal="fade-up">Trusted by 10,000+ students across the globe</p>
+    </div>
+  </section>
+</main>

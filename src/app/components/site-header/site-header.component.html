@@ -1,0 +1,75 @@
+<header
+  class="site-header"
+  [class.site-header--hidden]="headerHidden()"
+  [class.site-header--menu-open]="mobileMenuOpen()"
+  [class.site-header--raised]="headerRaised()"
+>
+  <div class="section-shell site-header__shell">
+    <a class="site-header__brand" [routerLink]="brandHref()" (click)="closeMobileMenu()">
+      <span class="site-header__brand-mark" aria-hidden="true">
+        <i class="fa-solid fa-book-open-reader"></i>
+      </span>
+      <span class="site-header__brand-name">{{ brand() }}</span>
+    </a>
+
+    <button
+      type="button"
+      class="site-header__toggle"
+      aria-controls="site-header-menu"
+      [attr.aria-expanded]="mobileMenuOpen()"
+      aria-label="Toggle navigation menu"
+      (click)="toggleMobileMenu()"
+    >
+      <i aria-hidden="true" class="fa-solid" [class.fa-bars]="!mobileMenuOpen()" [class.fa-xmark]="mobileMenuOpen()"></i>
+    </button>
+
+    <div class="site-header__menu" id="site-header-menu" [class.site-header__menu--open]="mobileMenuOpen()">
+      <nav class="site-header__nav">
+        @for (item of navItems(); track item.label) {
+          @if (item.type === 'href') {
+            <a class="site-header__link" [href]="item.path" (click)="closeMobileMenu()">{{ item.label }}</a>
+          } @else {
+            <a
+              class="site-header__link"
+              [routerLink]="item.path"
+              routerLinkActive="site-header__link--active"
+              [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
+              (click)="closeMobileMenu()"
+            >
+              {{ item.label }}
+            </a>
+          }
+        }
+      </nav>
+
+      <div class="site-header__actions">
+        @for (action of actions(); track action.label) {
+          @if (action.type === 'href') {
+            <a
+              class="site-header__action"
+              [class]="'site-header__action site-header__action--' + action.variant"
+              [href]="action.path"
+              (click)="closeMobileMenu()"
+            >
+              {{ action.label }}
+            </a>
+          } @else {
+            <a
+              class="site-header__action"
+              [class]="'site-header__action site-header__action--' + action.variant"
+              [routerLink]="action.path"
+              (click)="closeMobileMenu()"
+            >
+              {{ action.label }}
+            </a>
+          }
+        }
+
+        @if (avatarLabel(); as label) {
+          <span class="site-header__avatar">{{ label }}</span>
+        }
+      </div>
+    </div>
+  </div>
+</header>
+<div aria-hidden="true" class="site-header__spacer"></div>
