@@ -1,15 +1,29 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, effect, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 
-import type { AdminProfile } from './admin-auth.service';
-import { AdminAuthService } from './admin-auth.service';
-import { AdminContentEditorComponent } from './admin-content-editor.component';
+import type { AdmissionLog, AdmissionStatus, ContactLog, MediaAsset, MediaKind } from '../data-records.model';
+import { AdmissionLogService } from '../admission-log.service';
+import { ContactLogService } from '../contact-log.service';
+import { MediaLibraryService } from '../media-library.service';
 import { SiteContentService } from '../site-content.service';
 import type { SiteContent } from '../site-content.model';
 import { ToastService } from '../toast/toast.service';
+import { AdminAuthService } from './admin-auth.service';
+import { AdminContentEditorComponent } from './admin-content-editor.component';
+import { AdminMediaDialogService } from './admin-media-dialog.service';
+import { AdminPaginationComponent } from './admin-pagination.component';
 
-type AdminTab = 'dashboard' | 'pages' | 'settings' | 'profile' | 'management';
+type AdminSectionKey = 'dashboard' | 'pages' | 'settings' | 'media' | 'admissions' | 'contacts' | 'management';
+
+type AdminSection = {
+  key: AdminSectionKey;
+  label: string;
+  icon: string;
+  description: string;
+};
 
 type PageSectionConfig = {
   key: string;
@@ -34,6 +48,85 @@ type PageConfig = {
   description: string;
   sections: PageSectionConfig[];
 };
+
+type WebsiteContentTabKey = PageKey | 'otherContent';
+
+type WebsiteContentTab = {
+  key: WebsiteContentTabKey;
+  label: string;
+  description: string;
+  route: string | null;
+};
+
+type AdmissionOptionFieldKey = 'currentClassOptions' | 'desiredCourseOptions' | 'boardOptions';
+
+type AdmissionOptionField = {
+  key: AdmissionOptionFieldKey;
+  label: string;
+  description: string;
+};
+
+type DeleteTarget =
+  | { kind: 'media'; id: string }
+  | { kind: 'admission'; id: string }
+  | { kind: 'contact'; id: string }
+  | null;
+
+type DeleteKind = 'media' | 'admission' | 'contact';
+
+type ModalState =
+  | { kind: 'media'; asset: MediaAsset }
+  | { kind: 'admission-view'; log: AdmissionLog }
+  | { kind: 'admission-edit'; log: AdmissionLog }
+  | { kind: 'contact'; log: ContactLog }
+  | null;
+
+type PaginationKey = 'sidebar' | 'pageTabs' | 'sectionTabs' | 'media' | 'admissions' | 'contacts' | 'mediaPicker';
+
+const ADMIN_SECTIONS: AdminSection[] = [
+  {
+    key: 'dashboard',
+    label: 'Dashboard',
+    icon: 'fa-solid fa-chart-line',
+    description: 'Overview of content, media, and inbound leads.'
+  },
+  {
+    key: 'pages',
+    label: 'Website Content',
+    icon: 'fa-solid fa-layer-group',
+    description: 'Edit every public page section with Firebase-backed content.'
+  },
+  {
+    key: 'settings',
+    label: 'Site Settings',
+    icon: 'fa-solid fa-sliders',
+    description: 'Manage brand, navigation, footer, and global site settings.'
+  },
+  {
+    key: 'media',
+    label: 'Media Libraries',
+    icon: 'fa-solid fa-photo-film',
+    description: 'Upload, replace, preview, and remove shared storage assets.'
+  },
+  {
+    key: 'admissions',
+    label: 'Admission Logs',
+    icon: 'fa-solid fa-user-graduate',
+    description: 'Review, edit, and remove admission enquiries.'
+  },
+  {
+    key: 'contacts',
+    label: 'Contact Log',
+    icon: 'fa-solid fa-address-book',
+    description: 'Track contact form enquiries submitted on the public site.'
+  },
+  {
+    key: 'management',
+    label: 'Management',
+    icon: 'fa-solid fa-database',
+    description: 'Import, export, and restore website content datasets.'
+  }
+];
 
 const PAGE_CONFIGS: PageConfig[] = [
   {
@@ -155,113 +248,176 @@ const PAGE_CONFIGS: PageConfig[] = [
   }
 ];
 
+const ADMISSION_STATUSES: AdmissionStatus[] = ['new', 'in-review', 'contacted', 'enrolled'];
+
+const OTHER_CONTENT_TAB: WebsiteContentTab = {
+  key: 'otherContent',
+  label: 'Other Content',
+  description: 'Manage shared admission form option values used on the public site.',
+  route: null
+};
+
+const ADMISSION_OPTION_FIELDS: AdmissionOptionField[] = [
+  {
+    key: 'currentClassOptions',
+    label: 'Current Class',
+    description: 'Options shown in the "Current Class" dropdown on the Admission form.'
+  },
+  {
+    key: 'desiredCourseOptions',
+    label: 'Desired Course',
+    description: 'Options shown in the "Desired Course" dropdown on the Admission form.'
+  },
+  {
+    key: 'boardOptions',
+    label: 'Board',
+    description: 'Options shown in the "Board" dropdown on the Admission form.'
+  }
+];
+
 @Component({
   selector: 'app-admin-page',
   standalone: true,
-  imports: [FormsModule, AdminContentEditorComponent],
+  imports: [CommonModule, FormsModule, AdminContentEditorComponent, AdminPaginationComponent],
   templateUrl: './admin-page.component.html',
   styleUrl: './admin-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminPageComponent {
   private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly sanitizer = inject(DomSanitizer);
   private readonly contentService = inject(SiteContentService);
   private readonly authService = inject(AdminAuthService);
+  private readonly mediaLibraryService = inject(MediaLibraryService);
+  private readonly admissionLogService = inject(AdmissionLogService);
+  private readonly contactLogService = inject(ContactLogService);
+  private readonly mediaDialogService = inject(AdminMediaDialogService);
   private readonly toastService = inject(ToastService);
 
-  readonly tabs: { key: AdminTab; label: string }[] = [
-    { key: 'dashboard', label: 'Dashboard' },
-    { key: 'pages', label: 'Pages' },
-    { key: 'settings', label: 'Settings' },
-    { key: 'profile', label: 'Admin Profile' },
-    { key: 'management', label: 'Management' }
-  ];
+  readonly sections = ADMIN_SECTIONS;
   readonly pageConfigs = PAGE_CONFIGS;
   readonly adminSession = this.authService.session;
+  readonly contentLoading = this.contentService.isLoading;
+  readonly mediaLoading = this.mediaLibraryService.isLoading;
+  readonly admissionsLoading = this.admissionLogService.isLoading;
+  readonly contactsLoading = this.contactLogService.isLoading;
+  readonly mediaDialog = this.mediaDialogService.request;
+  readonly admissionStatuses = ADMISSION_STATUSES;
+  readonly mediaFilters: Array<MediaKind | 'all'> = ['all', 'image', 'document', 'other'];
+  readonly admissionOptionFields = ADMISSION_OPTION_FIELDS;
 
   readonly defaultContent = this.contentService.getDefaultContent();
-  selectedTab: AdminTab = 'dashboard';
+
+  selectedSection: AdminSectionKey = 'dashboard';
   selectedPageKey: PageKey = 'home';
+  selectedWebsiteTab: WebsiteContentTabKey = 'home';
   selectedSectionKey = 'hero';
   importPayload = '';
 
-  draft: SiteContent = this.contentService.getSnapshot();
-  profileDraft: AdminProfile = this.authService.getProfileSnapshot();
+  mediaFilter: MediaKind | 'all' = 'all';
+  mediaSearch = '';
+  mediaPickerSearch = '';
+  admissionSearch = '';
+  contactSearch = '';
 
-  setTab(tab: AdminTab): void {
-    this.selectedTab = tab;
+  draft: SiteContent = this.contentService.getSnapshot();
+  pendingDelete: DeleteTarget = null;
+  activeModal: ModalState = null;
+  isSavingContent = false;
+  isUploadingMedia = false;
+  isSavingAdmission = false;
+
+  admissionEditDraft: AdmissionLog | null = null;
+  newAdmissionOptionDraft: Record<AdmissionOptionFieldKey, string> = {
+    currentClassOptions: '',
+    desiredCourseOptions: '',
+    boardOptions: ''
+  };
+
+  private readonly paginationState: Record<PaginationKey, number> = {
+    sidebar: 1,
+    pageTabs: 1,
+    sectionTabs: 1,
+    media: 1,
+    admissions: 1,
+    contacts: 1,
+    mediaPicker: 1
+  };
+
+  constructor() {
+    effect(() => {
+      this.contentService.content();
+      this.draft = this.contentService.getSnapshot();
+      this.cdr.markForCheck();
+    });
+  }
+
+  setSection(sectionKey: AdminSectionKey): void {
+    this.selectedSection = sectionKey;
+    this.pendingDelete = null;
   }
 
   setSelectedPage(pageKey: PageKey): void {
+    this.selectedWebsiteTab = pageKey;
     this.selectedPageKey = pageKey;
     this.selectedSectionKey = this.activePage.sections[0]?.key ?? 'hero';
+    this.setPageNumber('sectionTabs', 1);
   }
 
-  setSelectedSection(sectionKey: string): void {
+  setSelectedWebsiteTab(tabKey: WebsiteContentTabKey): void {
+    if (tabKey === 'otherContent') {
+      this.selectedWebsiteTab = 'otherContent';
+      return;
+    }
+
+    this.setSelectedPage(tabKey);
+  }
+
+  setSelectedContentSection(sectionKey: string): void {
     this.selectedSectionKey = sectionKey;
   }
 
-  saveContent(): void {
+  setPageNumber(key: PaginationKey, page: number): void {
+    this.paginationState[key] = page;
+  }
+
+  pageNumber(key: PaginationKey): number {
+    return this.paginationState[key];
+  }
+
+  async saveContent(): Promise<void> {
+    this.isSavingContent = true;
+
     try {
-      this.contentService.saveContent(this.draft);
-      this.draft = this.contentService.getSnapshot();
-      this.toastService.success('Site content saved to browser storage.');
+      await this.contentService.saveContent(this.draft);
+      this.toastService.success('Website content saved to Firebase.');
     } catch {
-      this.toastService.error('Site content could not be saved.');
+      this.toastService.error('Website content could not be saved.');
+    } finally {
+      this.isSavingContent = false;
     }
   }
 
   discardChanges(): void {
-    try {
-      this.draft = this.contentService.getSnapshot();
-      this.toastService.info('Unsaved draft changes were discarded.');
-    } catch {
-      this.toastService.error('Draft could not be restored.');
-    }
+    this.draft = this.contentService.getSnapshot();
+    this.toastService.info('Unsaved draft changes were discarded.');
   }
 
-  resetSiteContent(): void {
+  async resetSiteContent(): Promise<void> {
     try {
-      this.draft = this.contentService.resetContent();
-      this.toastService.info('Site content was reset to the default dataset.');
+      this.draft = await this.contentService.resetContent();
+      this.toastService.info('Site content was restored to the seeded Firebase defaults.');
     } catch {
       this.toastService.error('Site content could not be reset.');
     }
   }
 
-  saveProfile(): void {
-    try {
-      this.authService.updateProfile(this.profileDraft);
-      this.profileDraft = this.authService.getProfileSnapshot();
-      this.toastService.success('Admin profile updated successfully.');
-    } catch {
-      this.toastService.error('Admin profile could not be updated.');
-    }
-  }
-
-  async resetProfile(): Promise<void> {
-    try {
-      this.profileDraft = this.authService.resetProfile();
-      this.toastService.info('Admin profile reset. Sign in again with the default credentials.');
-      const navigated = await this.router.navigate(['/admin/login']);
-
-      if (!navigated) {
-        this.toastService.error('Admin reset completed, but navigation to login failed.');
-      }
-    } catch {
-      this.toastService.error('Admin profile could not be reset.');
-    }
-  }
-
   async logout(): Promise<void> {
     try {
-      this.authService.logout();
+      await this.authService.logout();
+      await this.router.navigate(['/admin/login']);
       this.toastService.info('You have been logged out.');
-      const navigated = await this.router.navigate(['/admin/login']);
-
-      if (!navigated) {
-        this.toastService.error('Logout completed, but navigation to login failed.');
-      }
     } catch {
       this.toastService.error('Logout could not be completed.');
     }
@@ -284,15 +440,14 @@ export class AdminPageComponent {
     this.toastService.success('Content backup downloaded.');
   }
 
-  importFromTextarea(): void {
+  async importFromTextarea(): Promise<void> {
     if (!this.importPayload.trim()) {
       this.toastService.error('Paste a JSON payload before importing.');
       return;
     }
 
     try {
-      this.contentService.importContent(this.importPayload);
-      this.draft = this.contentService.getSnapshot();
+      this.draft = await this.contentService.importContent(this.importPayload);
       this.importPayload = '';
       this.toastService.success('JSON payload imported successfully.');
     } catch {
@@ -310,7 +465,7 @@ export class AdminPageComponent {
     const file = target.files[0];
     const reader = new FileReader();
 
-    reader.onload = () => {
+    reader.onload = async () => {
       if (typeof reader.result !== 'string') {
         this.toastService.error('Unsupported import file format.');
         target.value = '';
@@ -318,8 +473,7 @@ export class AdminPageComponent {
       }
 
       try {
-        this.contentService.importContent(reader.result);
-        this.draft = this.contentService.getSnapshot();
+        this.draft = await this.contentService.importContent(reader.result);
         this.toastService.success('Import file applied successfully.');
       } catch {
         this.toastService.error('Import file could not be parsed.');
@@ -336,12 +490,209 @@ export class AdminPageComponent {
     reader.readAsText(file);
   }
 
+  async uploadNewMedia(): Promise<void> {
+    const files = await this.pickFiles('', true);
+
+    if (!files.length) {
+      return;
+    }
+
+    this.isUploadingMedia = true;
+
+    try {
+      await this.mediaLibraryService.uploadFiles(files);
+      this.toastService.success(`${files.length} media item${files.length > 1 ? 's were' : ' was'} uploaded.`);
+    } catch {
+      this.toastService.error('Media upload failed.');
+    } finally {
+      this.isUploadingMedia = false;
+    }
+  }
+
+  async replaceMedia(asset: MediaAsset): Promise<void> {
+    const accept = asset.kind === 'image' ? 'image/*' : '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt';
+    const files = await this.pickFiles(accept);
+
+    if (!files.length) {
+      return;
+    }
+
+    try {
+      const updatedAsset = await this.mediaLibraryService.replaceAsset(asset, files[0]);
+      const replacedReferences = await this.contentService.replaceMediaReferences(asset.url, updatedAsset.url);
+
+      this.toastService.success(
+        replacedReferences > 0
+          ? `Media replaced and ${replacedReferences} linked content reference${replacedReferences > 1 ? 's were' : ' was'} updated.`
+          : 'Media replaced successfully.'
+      );
+      this.pendingDelete = null;
+    } catch {
+      this.toastService.error('Media could not be replaced.');
+    }
+  }
+
+  async deleteMedia(asset: MediaAsset): Promise<void> {
+    try {
+      await this.mediaLibraryService.deleteAsset(asset);
+      this.pendingDelete = null;
+      this.toastService.info('Media item deleted from Firebase Storage and Media Libraries.');
+    } catch {
+      this.toastService.error('Media item could not be deleted.');
+    }
+  }
+
+  async deleteAdmission(log: AdmissionLog): Promise<void> {
+    try {
+      await this.admissionLogService.deleteLog(log.id);
+      this.pendingDelete = null;
+      this.toastService.info('Admission log deleted.');
+    } catch {
+      this.toastService.error('Admission log could not be deleted.');
+    }
+  }
+
+  async deleteContact(log: ContactLog): Promise<void> {
+    try {
+      await this.contactLogService.deleteLog(log.id);
+      this.pendingDelete = null;
+      this.toastService.info('Contact log deleted.');
+    } catch {
+      this.toastService.error('Contact log could not be deleted.');
+    }
+  }
+
+  openMediaViewer(asset: MediaAsset): void {
+    this.activeModal = { kind: 'media', asset };
+  }
+
+  openAdmissionViewer(log: AdmissionLog): void {
+    this.activeModal = { kind: 'admission-view', log };
+  }
+
+  openAdmissionEditor(log: AdmissionLog): void {
+    this.admissionEditDraft = JSON.parse(JSON.stringify(log)) as AdmissionLog;
+    this.activeModal = { kind: 'admission-edit', log };
+  }
+
+  openContactViewer(log: ContactLog): void {
+    this.activeModal = { kind: 'contact', log };
+  }
+
+  closeModal(): void {
+    this.activeModal = null;
+    this.admissionEditDraft = null;
+  }
+
+  async saveAdmissionEdit(): Promise<void> {
+    if (!this.admissionEditDraft) {
+      return;
+    }
+
+    this.isSavingAdmission = true;
+
+    try {
+      const { id, createdAt, ...updates } = this.admissionEditDraft;
+      await this.admissionLogService.updateLog(id, updates);
+      this.toastService.success('Admission log updated successfully.');
+      this.closeModal();
+    } catch {
+      this.toastService.error('Admission log could not be updated.');
+    } finally {
+      this.isSavingAdmission = false;
+    }
+  }
+
+  setPendingDelete(target: DeleteTarget): void {
+    this.pendingDelete =
+      this.pendingDelete?.kind === target?.kind && this.pendingDelete?.id === target?.id ? null : target;
+  }
+
+  isPendingDelete(kind: DeleteKind, id: string): boolean {
+    return this.pendingDelete?.kind === kind && this.pendingDelete.id === id;
+  }
+
+  setMediaFilter(filter: MediaKind | 'all'): void {
+    this.mediaFilter = filter;
+    this.setPageNumber('media', 1);
+  }
+
+  setMediaSearch(value: string): void {
+    this.mediaSearch = value;
+    this.setPageNumber('media', 1);
+  }
+
+  setMediaPickerSearch(value: string): void {
+    this.mediaPickerSearch = value;
+    this.setPageNumber('mediaPicker', 1);
+  }
+
+  setAdmissionSearch(value: string): void {
+    this.admissionSearch = value;
+    this.setPageNumber('admissions', 1);
+  }
+
+  setContactSearch(value: string): void {
+    this.contactSearch = value;
+    this.setPageNumber('contacts', 1);
+  }
+
+  closeMediaDialog(): void {
+    this.mediaPickerSearch = '';
+    this.mediaDialogService.close(null);
+  }
+
+  selectDialogMedia(asset: MediaAsset): void {
+    this.mediaPickerSearch = '';
+    this.mediaDialogService.close(asset);
+  }
+
+  async uploadAndSelectDialogMedia(): Promise<void> {
+    const dialog = this.mediaDialog();
+
+    if (!dialog) {
+      return;
+    }
+
+    const accept = dialog.allowedKinds.length === 1 && dialog.allowedKinds[0] === 'image'
+      ? 'image/*'
+      : dialog.allowedKinds.every((kind) => kind !== 'image')
+        ? '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt'
+        : 'image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt';
+
+    const files = await this.pickFiles(accept);
+
+    if (!files.length) {
+      return;
+    }
+
+    try {
+      const asset = await this.mediaLibraryService.uploadFile(files[0]);
+      this.toastService.success('Media uploaded to the shared library.');
+      this.selectDialogMedia(asset);
+    } catch {
+      this.toastService.error('Media upload failed.');
+    }
+  }
+
   get activePage(): PageConfig {
     return this.pageConfigs.find((page) => page.key === this.selectedPageKey) ?? this.pageConfigs[0];
   }
 
-  get currentTabTitle(): string {
-    return this.tabs.find((tab) => tab.key === this.selectedTab)?.label ?? 'Dashboard';
+  get websiteContentTabs(): WebsiteContentTab[] {
+    return [...this.pageConfigs.map((page) => ({ ...page, route: page.route })), OTHER_CONTENT_TAB];
+  }
+
+  get activeWebsiteContentTab(): WebsiteContentTab {
+    return this.websiteContentTabs.find((tab) => tab.key === this.selectedWebsiteTab) ?? this.websiteContentTabs[0];
+  }
+
+  get isOtherContentTabSelected(): boolean {
+    return this.selectedWebsiteTab === 'otherContent';
+  }
+
+  get currentSectionMeta(): AdminSection {
+    return this.sections.find((section) => section.key === this.selectedSection) ?? this.sections[0];
   }
 
   get selectedSectionLabel(): string {
@@ -380,6 +731,149 @@ export class AdminPageComponent {
       : this.selectedSectionKey;
   }
 
+  get paginatedSections(): AdminSection[] {
+    return this.paginate(this.sections, 'sidebar', 5);
+  }
+
+  get paginatedPages(): PageConfig[] {
+    return this.paginate(this.pageConfigs, 'pageTabs', 4);
+  }
+
+  get paginatedWebsiteTabs(): WebsiteContentTab[] {
+    return this.paginate(this.websiteContentTabs, 'pageTabs', 4);
+  }
+
+  get paginatedContentSections(): PageSectionConfig[] {
+    return this.paginate(this.activePage.sections, 'sectionTabs', 6);
+  }
+
+  get filteredMediaAssets(): MediaAsset[] {
+    const searchValue = this.mediaSearch.trim().toLowerCase();
+
+    return this.mediaLibraryService.assets().filter((asset) => {
+      const matchesFilter = this.mediaFilter === 'all' || asset.kind === this.mediaFilter;
+      const matchesSearch =
+        !searchValue ||
+        [asset.name, asset.contentType, asset.extension]
+          .join(' ')
+          .toLowerCase()
+          .includes(searchValue);
+
+      return matchesFilter && matchesSearch;
+    });
+  }
+
+  get paginatedMediaAssets(): MediaAsset[] {
+    return this.paginate(this.filteredMediaAssets, 'media', 8);
+  }
+
+  get filteredAdmissionLogs(): AdmissionLog[] {
+    const searchValue = this.admissionSearch.trim().toLowerCase();
+
+    return this.admissionLogService.logs().filter((log) => {
+      if (!searchValue) {
+        return true;
+      }
+
+      return [
+        log.fullName,
+        log.currentClass,
+        log.desiredCourse,
+        log.schoolName,
+        log.board,
+        log.phone,
+        log.city,
+        log.state,
+        log.status,
+        log.adminNotes
+      ]
+        .join(' ')
+        .toLowerCase()
+        .includes(searchValue);
+    });
+  }
+
+  get paginatedAdmissionLogs(): AdmissionLog[] {
+    return this.paginate(this.filteredAdmissionLogs, 'admissions', 8);
+  }
+
+  get filteredContactLogs(): ContactLog[] {
+    const searchValue = this.contactSearch.trim().toLowerCase();
+
+    return this.contactLogService.logs().filter((log) => {
+      if (!searchValue) {
+        return true;
+      }
+
+      return [log.studentName, log.classLevel, log.goal, log.phone]
+        .join(' ')
+        .toLowerCase()
+        .includes(searchValue);
+    });
+  }
+
+  get paginatedContactLogs(): ContactLog[] {
+    return this.paginate(this.filteredContactLogs, 'contacts', 8);
+  }
+
+  get dialogMediaAssets(): MediaAsset[] {
+    const dialog = this.mediaDialog();
+
+    if (!dialog) {
+      return [];
+    }
+
+    const searchValue = this.mediaPickerSearch.trim().toLowerCase();
+
+    return this.paginate(
+      this.mediaLibraryService.assets().filter((asset) => {
+        const matchesKind = dialog.allowedKinds.includes(asset.kind);
+        const matchesSearch =
+          !searchValue ||
+          [asset.name, asset.contentType, asset.extension].join(' ').toLowerCase().includes(searchValue);
+
+        return matchesKind && matchesSearch;
+      }),
+      'mediaPicker',
+      6
+    );
+  }
+
+  get dialogMediaAssetCount(): number {
+    const dialog = this.mediaDialog();
+
+    if (!dialog) {
+      return 0;
+    }
+
+    const searchValue = this.mediaPickerSearch.trim().toLowerCase();
+
+    return this.mediaLibraryService.assets().filter((asset) => {
+      const matchesKind = dialog.allowedKinds.includes(asset.kind);
+      const matchesSearch =
+        !searchValue ||
+        [asset.name, asset.contentType, asset.extension].join(' ').toLowerCase().includes(searchValue);
+
+      return matchesKind && matchesSearch;
+    }).length;
+  }
+
+  get mediaModal(): Extract<NonNullable<ModalState>, { kind: 'media' }> | null {
+    return this.activeModal?.kind === 'media' ? this.activeModal : null;
+  }
+
+  get admissionViewModal(): Extract<NonNullable<ModalState>, { kind: 'admission-view' }> | null {
+    return this.activeModal?.kind === 'admission-view' ? this.activeModal : null;
+  }
+
+  get admissionEditModal(): Extract<NonNullable<ModalState>, { kind: 'admission-edit' }> | null {
+    return this.activeModal?.kind === 'admission-edit' ? this.activeModal : null;
+  }
+
+  get contactModal(): Extract<NonNullable<ModalState>, { kind: 'contact' }> | null {
+    return this.activeModal?.kind === 'contact' ? this.activeModal : null;
+  }
+
   get pageCount(): number {
     return this.pageConfigs.length;
   }
@@ -388,12 +882,146 @@ export class AdminPageComponent {
     return this.pageConfigs.reduce((total, page) => total + page.sections.length, 0);
   }
 
+  get mediaCount(): number {
+    return this.mediaLibraryService.assets().length;
+  }
+
+  get admissionCount(): number {
+    return this.admissionLogService.logs().length;
+  }
+
+  get contactCount(): number {
+    return this.contactLogService.logs().length;
+  }
+
   get imageCount(): number {
     return this.countImages(this.draft);
   }
 
   get textFieldCount(): number {
     return this.countTextFields(this.draft);
+  }
+
+  get recentAdmissions(): AdmissionLog[] {
+    return this.admissionLogService.logs().slice(0, 4);
+  }
+
+  get recentContacts(): ContactLog[] {
+    return this.contactLogService.logs().slice(0, 4);
+  }
+
+  get recentMedia(): MediaAsset[] {
+    return this.mediaLibraryService.assets().slice(0, 4);
+  }
+
+  admissionOptions(fieldKey: AdmissionOptionFieldKey): string[] {
+    return this.draft.admission.form[fieldKey];
+  }
+
+  updateAdmissionOption(fieldKey: AdmissionOptionFieldKey, index: number, value: string): void {
+    this.draft.admission.form[fieldKey][index] = value;
+  }
+
+  setNewAdmissionOptionDraft(fieldKey: AdmissionOptionFieldKey, value: string): void {
+    this.newAdmissionOptionDraft[fieldKey] = value;
+  }
+
+  addAdmissionOption(fieldKey: AdmissionOptionFieldKey): void {
+    const value = this.newAdmissionOptionDraft[fieldKey].trim();
+
+    if (!value) {
+      this.toastService.error('Enter an option value before adding.');
+      return;
+    }
+
+    const hasDuplicate = this.admissionOptions(fieldKey).some(
+      (item) => item.trim().toLowerCase() === value.toLowerCase()
+    );
+
+    if (hasDuplicate) {
+      this.toastService.error('This option already exists.');
+      return;
+    }
+
+    this.draft.admission.form[fieldKey].push(value);
+    this.newAdmissionOptionDraft[fieldKey] = '';
+    this.toastService.success('Option added to draft content.');
+  }
+
+  removeAdmissionOption(fieldKey: AdmissionOptionFieldKey, index: number): void {
+    this.draft.admission.form[fieldKey].splice(index, 1);
+    this.toastService.info('Option removed from draft content.');
+  }
+
+  mediaReferenceCount(asset: MediaAsset): number {
+    return this.contentService.countMediaReferences(asset.url);
+  }
+
+  deletePromptText(kind: DeleteKind, assetOrLog: MediaAsset | AdmissionLog | ContactLog): string {
+    if (kind === 'media') {
+      const asset = assetOrLog as MediaAsset;
+      const referenceCount = this.mediaReferenceCount(asset);
+      return referenceCount > 0
+        ? `Delete this asset? ${referenceCount} content reference${referenceCount > 1 ? 's still point to it.' : ' still points to it.'}`
+        : 'Delete this asset from Firebase Storage and Media Libraries?';
+    }
+
+    if (kind === 'admission') {
+      return 'Delete this admission log?';
+    }
+
+    return 'Delete this contact log?';
+  }
+
+  formatDate(timestamp: number): string {
+    if (!timestamp) {
+      return 'N/A';
+    }
+
+    return new Date(timestamp).toLocaleString('en-IN', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    });
+  }
+
+  formatFileSize(size: number): string {
+    if (!size) {
+      return '0 KB';
+    }
+
+    if (size < 1024 * 1024) {
+      return `${Math.max(1, Math.round(size / 1024))} KB`;
+    }
+
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  isPreviewableImage(asset: MediaAsset): boolean {
+    return asset.kind === 'image';
+  }
+
+  canPreviewInFrame(asset: MediaAsset): boolean {
+    return asset.kind === 'document' && asset.extension === 'pdf';
+  }
+
+  getSafeMediaUrl(url: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  statusLabel(status: AdmissionStatus): string {
+    return status.replace(/-/g, ' ').replace(/^\w/, (value) => value.toUpperCase());
+  }
+
+  private paginate<T>(items: T[], key: PaginationKey, pageSize: number): T[] {
+    const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+    const currentPage = Math.min(this.paginationState[key], totalPages);
+
+    if (currentPage !== this.paginationState[key]) {
+      this.paginationState[key] = currentPage;
+    }
+
+    const startIndex = (currentPage - 1) * pageSize;
+    return items.slice(startIndex, startIndex + pageSize);
   }
 
   private getPageRecord(pageKey: PageKey, content: SiteContent): Record<string, unknown> {
@@ -449,5 +1077,24 @@ export class AdminPageComponent {
     }
 
     return 0;
+  }
+
+  private pickFiles(accept: string, multiple = false): Promise<File[]> {
+    if (typeof document === 'undefined') {
+      return Promise.resolve([]);
+    }
+
+    return new Promise((resolve) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = accept;
+      input.multiple = multiple;
+
+      input.onchange = () => {
+        resolve(Array.from(input.files ?? []));
+      };
+
+      input.click();
+    });
   }
 }

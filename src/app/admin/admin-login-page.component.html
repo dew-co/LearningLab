@@ -6,23 +6,43 @@
       <p>
         Sign in to manage page content, image references, navigation, footer settings, and the admin workspace itself.
       </p>
-
-      <div class="admin-login__credentials">
-        <strong>Default login</strong>
-        <p>{{ defaultCredentials.email }}</p>
-        <p>{{ defaultCredentials.password }}</p>
-      </div>
     </div>
 
     <form class="admin-login__form" (ngSubmit)="submit()">
       <div class="admin-login__field">
         <label for="admin-email">Email</label>
-        <input id="admin-email" [(ngModel)]="email" name="email" type="email" required />
+        <input
+          id="admin-email"
+          [(ngModel)]="email"
+          name="email"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          type="email"
+          required
+        />
       </div>
 
       <div class="admin-login__field">
         <label for="admin-password">Password</label>
-        <input id="admin-password" [(ngModel)]="password" name="password" type="password" required />
+        <div class="admin-login__password-wrap">
+          <input
+            id="admin-password"
+            [(ngModel)]="password"
+            name="password"
+            [type]="showPassword ? 'text' : 'password'"
+            required
+          />
+          <button
+            type="button"
+            class="admin-login__password-toggle"
+            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+            [attr.title]="showPassword ? 'Hide password' : 'Show password'"
+            (click)="togglePasswordVisibility()"
+          >
+            <i [class]="showPassword ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye'" aria-hidden="true"></i>
+          </button>
+        </div>
       </div>
 
       <button type="submit">Open Admin Dashboard</button>

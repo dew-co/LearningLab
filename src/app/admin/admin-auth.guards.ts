@@ -8,12 +8,16 @@ export const adminAuthGuard: CanActivateFn = () => {
   const authService = inject(AdminAuthService);
   const router = inject(Router);
 
-  return authService.isAuthenticated() ? true : router.createUrlTree(['/admin/login']);
+  return authService.waitUntilReady().then(() =>
+    authService.isAuthenticated() ? true : router.createUrlTree(['/admin/login'])
+  );
 };
 
 export const adminGuestGuard: CanActivateFn = () => {
   const authService = inject(AdminAuthService);
   const router = inject(Router);
 
-  return authService.isAuthenticated() ? router.createUrlTree(['/admin']) : true;
+  return authService.waitUntilReady().then(() =>
+    authService.isAuthenticated() ? router.createUrlTree(['/admin']) : true
+  );
 };

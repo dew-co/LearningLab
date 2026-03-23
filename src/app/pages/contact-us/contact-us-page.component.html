@@ -33,27 +33,33 @@
           <p>{{ content().contact.enquiryForm.description }}</p>
         </div>
 
-        <form class="contact-page__form">
+        <form class="contact-page__form" (ngSubmit)="submitContactRequest()">
           <label>
             <span>{{ content().contact.enquiryForm.studentNameLabel }}</span>
-            <input [placeholder]="content().contact.enquiryForm.studentNamePlaceholder" type="text" />
+            <input
+              [(ngModel)]="formModel.studentName"
+              name="studentName"
+              [placeholder]="content().contact.enquiryForm.studentNamePlaceholder"
+              required
+              type="text"
+            />
           </label>
 
           <div class="contact-page__form-row">
             <label>
               <span>{{ content().contact.enquiryForm.classLabel }}</span>
-              <select>
-                @for (option of content().contact.enquiryForm.classOptions; track option) {
-                  <option>{{ option }}</option>
+              <select [(ngModel)]="formModel.classLevel" name="classLevel" required>
+                @for (option of content().contact.enquiryForm.classOptions; track option; let index = $index) {
+                  <option [value]="index === 0 ? '' : option">{{ option }}</option>
                 }
               </select>
             </label>
 
             <label>
               <span>{{ content().contact.enquiryForm.goalLabel }}</span>
-              <select>
-                @for (option of content().contact.enquiryForm.goalOptions; track option) {
-                  <option>{{ option }}</option>
+              <select [(ngModel)]="formModel.goal" name="goal" required>
+                @for (option of content().contact.enquiryForm.goalOptions; track option; let index = $index) {
+                  <option [value]="index === 0 ? '' : option">{{ option }}</option>
                 }
               </select>
             </label>
@@ -63,12 +69,18 @@
             <span>{{ content().contact.enquiryForm.phoneLabel }}</span>
             <div class="contact-page__phone">
               <small>{{ content().contact.enquiryForm.phonePrefix }}</small>
-              <input [placeholder]="content().contact.enquiryForm.phonePlaceholder" type="tel" />
+              <input
+                [(ngModel)]="formModel.phone"
+                name="phone"
+                [placeholder]="content().contact.enquiryForm.phonePlaceholder"
+                required
+                type="tel"
+              />
             </div>
           </label>
 
-          <button type="button">
-            <span>{{ content().contact.enquiryForm.submitLabel }}</span>
+          <button type="submit" [disabled]="isSubmitting">
+            <span>{{ isSubmitting ? 'Submitting...' : content().contact.enquiryForm.submitLabel }}</span>
             <i aria-hidden="true" class="contact-page__button-arrow fa-solid fa-arrow-right"></i>
           </button>
 

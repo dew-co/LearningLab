@@ -1,8 +1,9 @@
 <main class="admin-shell">
   <aside class="admin-shell__sidebar">
     <div class="admin-shell__brand">
-      <p>Admin Panel</p>
+      <p>Firebase Admin</p>
       <h1>{{ draft.site.brandName }}</h1>
+      <span>Realtime website content, media storage, and enquiry logs.</span>
     </div>
 
     <div class="admin-shell__profile-card">
@@ -14,59 +15,94 @@
     </div>
 
     <nav class="admin-shell__nav">
-      @for (tab of tabs; track tab.key) {
-        <button type="button" [class.admin-shell__nav-button--active]="selectedTab === tab.key" (click)="setTab(tab.key)">
-          {{ tab.label }}
+      @for (section of paginatedSections; track section.key) {
+        <button
+          type="button"
+          [class.admin-shell__nav-button--active]="selectedSection === section.key"
+          (click)="setSection(section.key)"
+        >
+          <span><i [class]="section.icon" aria-hidden="true"></i>{{ section.label }}</span>
+          <small>{{ section.description }}</small>
         </button>
       }
     </nav>
 
+    <app-admin-pagination
+      [currentPage]="pageNumber('sidebar')"
+      [pageSize]="5"
+      [totalItems]="sections.length"
+      (pageChange)="setPageNumber('sidebar', $event)"
+    ></app-admin-pagination>
+
     <div class="admin-shell__sidebar-note">
       <strong>Storage model</strong>
-      <p>All admin changes persist in this browser via local storage. There is no backend connected yet.</p>
+      <p>Auth, content, logs, and media now run through Firebase Auth, Firestore, and Firebase Storage.</p>
     </div>
   </aside>
 
   <section class="admin-shell__main">
     <header class="admin-shell__topbar">
       <div>
-        <p class="admin-shell__eyebrow">Separate /admin Workspace</p>
-        <h2>{{ currentTabTitle }}</h2>
+        <p class="admin-shell__eyebrow">{{ currentSectionMeta.label }}</p>
+        <h2>{{ currentSectionMeta.description }}</h2>
       </div>
 
       <div class="admin-shell__topbar-actions">
-        @if (selectedTab !== 'profile') {
-          <button class="admin-shell__action admin-shell__action--light" type="button" (click)="discardChanges()">Discard Draft</button>
-          <button class="admin-shell__action admin-shell__action--accent" type="button" (click)="saveContent()">Save Changes</button>
+        @if (selectedSection === 'pages' || selectedSection === 'settings') {
+          <button class="admin-shell__action admin-shell__action--light" type="button" (click)="discardChanges()">
+            Discard Draft
+          </button>
+          <button class="admin-shell__action admin-shell__action--accent" type="button" (click)="saveContent()">
+            {{ isSavingContent ? 'Saving...' : 'Save Changes' }}
+          </button>
         }
+
+        @if (selectedSection === 'media') {
+          <button class="admin-shell__action admin-shell__action--accent" type="button" (click)="uploadNewMedia()">
+            {{ isUploadingMedia ? 'Uploading...' : 'Upload Media' }}
+          </button>
+        }
+
         <button class="admin-shell__action admin-shell__action--dark" type="button" (click)="logout()">Logout</button>
       </div>
     </header>
 
-    @if (selectedTab === 'dashboard') {
+    @if (selectedSection === 'dashboard') {
       <section class="admin-shell__dashboard-grid">
         <article class="admin-shell__metric">
           <p>Pages</p>
           <strong>{{ pageCount }}</strong>
-          <span>Public site destinations managed via admin.</span>
+          <span>Public website destinations managed from Firebase content.</span>
         </article>
 
         <article class="admin-shell__metric">
           <p>Sections</p>
           <strong>{{ sectionCount }}</strong>
-          <span>Editable page section tabs configured across the site.</span>
+          <span>Editable page sections available in the admin editor.</span>
+        </article>
+
+        <article class="admin-shell__metric">
+          <p>Media Assets</p>
+          <strong>{{ mediaCount }}</strong>
+          <span>Shared images and documents stored in Media Libraries.</span>
+        </article>
+
+        <article class="admin-shell__metric">
+          <p>Admission Logs</p>
+          <strong>{{ admissionCount }}</strong>
+          <span>Admission enquiries collected from the public site.</span>
+        </article>
+
+        <article class="admin-shell__metric">
+          <p>Contact Logs</p>
+          <strong>{{ contactCount }}</strong>
+          <span>Contact enquiries submitted through the website form.</span>
         </article>
 
         <article class="admin-shell__metric">
           <p>Image Fields</p>
           <strong>{{ imageCount }}</strong>
-          <span>Image or media references currently editable in the dataset.</span>
-        </article>
-
-        <article class="admin-shell__metric">
-          <p>Text Fields</p>
-          <strong>{{ textFieldCount }}</strong>
-          <span>Text blocks currently managed from the shared content tree.</span>
+          <span>Editable content fields currently pointing at media assets.</span>
         </article>
       </section>
 
@@ -74,12 +110,12 @@
         <article class="admin-shell__card">
           <div class="admin-shell__card-head">
             <h3>Quick Navigation</h3>
-            <p>Jump directly into the page editor tab and preview the public routes.</p>
+            <p>Jump directly into a page editor or public route preview.</p>
           </div>
 
           <div class="admin-shell__quick-links">
             @for (page of pageConfigs; track page.key) {
-              <button type="button" class="admin-shell__quick-link" (click)="setTab('pages'); setSelectedPage(page.key)">
+              <button type="button" class="admin-shell__quick-link" (click)="setSection('pages'); setSelectedPage(page.key)">
                 <strong>{{ page.label }}</strong>
                 <span>{{ page.description }}</span>
               </button>
@@ -89,75 +125,194 @@
 
         <article class="admin-shell__card">
           <div class="admin-shell__card-head">
-            <h3>What This Admin Controls</h3>
-            <p>Current scope of the separate `/admin` route implementation.</p>
+            <h3>Recent Admissions</h3>
+            <p>Newest form submissions coming in from the admission page.</p>
           </div>
 
-          <ul class="admin-shell__bullet-list">
-            <li>Dashboard overview with page, section, image, and content metrics.</li>
-            <li>Pages tab with page-level tabs and section-level tabs for each route.</li>
-            <li>Settings editor for brand, navigation, header action, footer links, and contact details.</li>
-            <li>Admin profile editor for credentials, display identity, and support details.</li>
-            <li>Management tools for export, import, draft reset, and admin reset.</li>
-          </ul>
+          @if (recentAdmissions.length) {
+            <div class="admin-shell__stack-list">
+              @for (log of recentAdmissions; track log.id) {
+                <button type="button" class="admin-shell__stack-item" (click)="openAdmissionViewer(log)">
+                  <strong>{{ log.fullName }}</strong>
+                  <span>{{ log.desiredCourse }} • {{ formatDate(log.createdAt) }}</span>
+                </button>
+              }
+            </div>
+          } @else {
+            <p class="admin-shell__empty">No admission enquiries have been submitted yet.</p>
+          }
+        </article>
+
+        <article class="admin-shell__card">
+          <div class="admin-shell__card-head">
+            <h3>Recent Contact Leads</h3>
+            <p>Latest enquiries received from the contact form.</p>
+          </div>
+
+          @if (recentContacts.length) {
+            <div class="admin-shell__stack-list">
+              @for (log of recentContacts; track log.id) {
+                <button type="button" class="admin-shell__stack-item" (click)="openContactViewer(log)">
+                  <strong>{{ log.studentName }}</strong>
+                  <span>{{ log.goal }} • {{ formatDate(log.createdAt) }}</span>
+                </button>
+              }
+            </div>
+          } @else {
+            <p class="admin-shell__empty">No contact enquiries have been submitted yet.</p>
+          }
+        </article>
+
+        <article class="admin-shell__card">
+          <div class="admin-shell__card-head">
+            <h3>Latest Media Uploads</h3>
+            <p>Most recently updated items in Media Libraries.</p>
+          </div>
+
+          @if (recentMedia.length) {
+            <div class="admin-shell__stack-list">
+              @for (asset of recentMedia; track asset.id) {
+                <button type="button" class="admin-shell__stack-item" (click)="openMediaViewer(asset)">
+                  <strong>{{ asset.name }}</strong>
+                  <span>{{ asset.kind }} • {{ formatDate(asset.updatedAt) }}</span>
+                </button>
+              }
+            </div>
+          } @else {
+            <p class="admin-shell__empty">No media items have been uploaded yet.</p>
+          }
         </article>
       </section>
     }
 
-    @if (selectedTab === 'pages') {
+    @if (selectedSection === 'pages') {
       <section class="admin-shell__card">
         <div class="admin-shell__card-head">
-          <h3>All Pages</h3>
-          <p>Select a public page, then switch between its editable section tabs.</p>
+          <h3>Website Content</h3>
+          <p>All website content is stored in Firestore and managed section-by-section from this editor.</p>
         </div>
 
         <div class="admin-shell__tab-row">
-          @for (page of pageConfigs; track page.key) {
-            <button type="button" [class.admin-shell__tab-button--active]="selectedPageKey === page.key" (click)="setSelectedPage(page.key)">
-              {{ page.label }}
-            </button>
-          }
-        </div>
-
-        <div class="admin-shell__page-meta">
-          <div>
-            <strong>{{ activePage.label }}</strong>
-            <p>{{ activePage.description }}</p>
-          </div>
-          <a [href]="activePage.route" target="_blank" rel="noreferrer">Preview Page</a>
-        </div>
-
-        <div class="admin-shell__tab-row admin-shell__tab-row--sub">
-          @for (section of activePage.sections; track section.key) {
+          @for (tab of paginatedWebsiteTabs; track tab.key) {
             <button
               type="button"
-              [class.admin-shell__tab-button--active]="selectedSectionKey === section.key"
-              (click)="setSelectedSection(section.key)"
+              [class.admin-shell__tab-button--active]="selectedWebsiteTab === tab.key"
+              (click)="setSelectedWebsiteTab(tab.key)"
             >
-              {{ section.label }}
+              {{ tab.label }}
             </button>
           }
         </div>
 
-        <div class="admin-shell__editor-wrap">
-          <app-admin-content-editor
-            [depth]="0"
-            [keyOrIndex]="selectedSectionParentKey"
-            [label]="selectedSectionLabel"
-            [model]="selectedSectionModel"
-            [parent]="selectedSectionParent"
-            [prototype]="selectedSectionPrototype"
-            [rawKey]="selectedSectionParentKey"
-          ></app-admin-content-editor>
-        </div>
+        <app-admin-pagination
+          [currentPage]="pageNumber('pageTabs')"
+          [pageSize]="4"
+          [totalItems]="websiteContentTabs.length"
+          (pageChange)="setPageNumber('pageTabs', $event)"
+        ></app-admin-pagination>
+
+        @if (!isOtherContentTabSelected) {
+          <div class="admin-shell__page-meta">
+            <div>
+              <strong>{{ activePage.label }}</strong>
+              <p>{{ activePage.description }}</p>
+            </div>
+            <a [href]="activePage.route" target="_blank" rel="noreferrer">Preview Page</a>
+          </div>
+
+          <div class="admin-shell__tab-row admin-shell__tab-row--sub">
+            @for (section of paginatedContentSections; track section.key) {
+              <button
+                type="button"
+                [class.admin-shell__tab-button--active]="selectedSectionKey === section.key"
+                (click)="setSelectedContentSection(section.key)"
+              >
+                {{ section.label }}
+              </button>
+            }
+          </div>
+
+          <app-admin-pagination
+            [currentPage]="pageNumber('sectionTabs')"
+            [pageSize]="6"
+            [totalItems]="activePage.sections.length"
+            (pageChange)="setPageNumber('sectionTabs', $event)"
+          ></app-admin-pagination>
+
+          <div class="admin-shell__editor-wrap">
+            <app-admin-content-editor
+              [depth]="0"
+              [keyOrIndex]="selectedSectionParentKey"
+              [label]="selectedSectionLabel"
+              [model]="selectedSectionModel"
+              [parent]="selectedSectionParent"
+              [prototype]="selectedSectionPrototype"
+              [rawKey]="selectedSectionParentKey"
+            ></app-admin-content-editor>
+          </div>
+        } @else {
+          <div class="admin-shell__page-meta">
+            <div>
+              <strong>{{ activeWebsiteContentTab.label }}</strong>
+              <p>{{ activeWebsiteContentTab.description }}</p>
+            </div>
+          </div>
+
+          <section class="admin-shell__other-content">
+            @for (field of admissionOptionFields; track field.key) {
+              <article class="admin-shell__other-card">
+                <div class="admin-shell__other-head">
+                  <h4>{{ field.label }}</h4>
+                  <p>{{ field.description }}</p>
+                </div>
+
+                @if (admissionOptions(field.key).length) {
+                  <div class="admin-shell__option-list">
+                    @for (option of admissionOptions(field.key); track $index) {
+                      <div class="admin-shell__option-item">
+                        <input
+                          [ngModel]="option"
+                          (ngModelChange)="updateAdmissionOption(field.key, $index, $event)"
+                          [name]="field.key + '-option-' + $index"
+                          type="text"
+                        />
+                        <button
+                          type="button"
+                          aria-label="Delete option"
+                          title="Delete option"
+                          (click)="removeAdmissionOption(field.key, $index)"
+                        >
+                          <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <p class="admin-shell__empty">No options yet. Add one below.</p>
+                }
+
+                <div class="admin-shell__option-add">
+                  <input
+                    [ngModel]="newAdmissionOptionDraft[field.key]"
+                    (ngModelChange)="setNewAdmissionOptionDraft(field.key, $event)"
+                    [name]="field.key + '-new'"
+                    placeholder="Add new option"
+                    type="text"
+                  />
+                  <button type="button" (click)="addAdmissionOption(field.key)">Add</button>
+                </div>
+              </article>
+            }
+          </section>
+        }
       </section>
     }
 
-    @if (selectedTab === 'settings') {
+    @if (selectedSection === 'settings') {
       <section class="admin-shell__card">
         <div class="admin-shell__card-head">
           <h3>Site Settings</h3>
-          <p>Control navigation, header actions, footer links, contact details, and social links.</p>
+          <p>Brand identity, navigation, footer links, contact details, and other site-wide settings.</p>
         </div>
 
         <div class="admin-shell__editor-wrap">
@@ -174,63 +329,236 @@
       </section>
     }
 
-    @if (selectedTab === 'profile') {
+    @if (selectedSection === 'media') {
       <section class="admin-shell__card">
         <div class="admin-shell__card-head">
-          <h3>Admin Profile</h3>
-          <p>Update the admin identity, login credentials, and support contact details.</p>
+          <h3>Media Libraries</h3>
+          <p>All uploads are stored in Firebase Storage and can be reused across every content section.</p>
         </div>
 
-        <form class="admin-shell__profile-form" (ngSubmit)="saveProfile()">
-          <label>
-            <span>Full Name</span>
-            <input [(ngModel)]="profileDraft.fullName" name="fullName" type="text" required />
-          </label>
+        <div class="admin-shell__toolbar">
+          <input
+            class="admin-shell__search"
+            [ngModel]="mediaSearch"
+            (ngModelChange)="setMediaSearch($event)"
+            placeholder="Search media by file name or type"
+            type="search"
+          />
 
-          <label>
-            <span>Email</span>
-            <input [(ngModel)]="profileDraft.email" name="email" type="email" required />
-          </label>
-
-          <label>
-            <span>Role</span>
-            <input [(ngModel)]="profileDraft.role" name="role" type="text" required />
-          </label>
-
-          <label>
-            <span>Phone</span>
-            <input [(ngModel)]="profileDraft.phone" name="phone" type="tel" required />
-          </label>
-
-          <label>
-            <span>Avatar Label</span>
-            <input [(ngModel)]="profileDraft.avatarLabel" maxlength="3" name="avatarLabel" type="text" required />
-          </label>
-
-          <label class="admin-shell__profile-form--wide">
-            <span>Bio</span>
-            <textarea [(ngModel)]="profileDraft.bio" name="bio" rows="4"></textarea>
-          </label>
-
-          <label>
-            <span>Password</span>
-            <input [(ngModel)]="profileDraft.password" name="password" type="text" required />
-          </label>
-
-          <div class="admin-shell__profile-actions">
-            <button class="admin-shell__action admin-shell__action--accent" type="submit">Save Profile</button>
-            <button class="admin-shell__action admin-shell__action--light" type="button" (click)="resetProfile()">Reset Admin</button>
+          <div class="admin-shell__filter-row">
+            @for (kind of mediaFilters; track kind) {
+              <button
+                type="button"
+                [class.admin-shell__filter-button--active]="mediaFilter === kind"
+                class="admin-shell__filter-button"
+                (click)="setMediaFilter(kind)"
+              >
+                {{ kind }}
+              </button>
+            }
           </div>
-        </form>
+        </div>
+
+        @if (paginatedMediaAssets.length) {
+          <div class="admin-shell__record-grid">
+            @for (asset of paginatedMediaAssets; track asset.id) {
+              <article class="admin-shell__record-card">
+                <div class="admin-shell__media-preview">
+                  @if (isPreviewableImage(asset)) {
+                    <img [alt]="asset.name" [src]="asset.url" />
+                  } @else {
+                    <div class="admin-shell__media-placeholder">
+                      <i
+                        [class]="asset.kind === 'document' ? 'fa-regular fa-file-lines' : 'fa-regular fa-file'"
+                        aria-hidden="true"
+                      ></i>
+                    </div>
+                  }
+                </div>
+
+                <div class="admin-shell__record-copy">
+                  <strong>{{ asset.name }}</strong>
+                  <p>{{ asset.kind }} • {{ formatFileSize(asset.size) }} • {{ formatDate(asset.updatedAt) }}</p>
+                  <small>{{ mediaReferenceCount(asset) }} content reference{{ mediaReferenceCount(asset) === 1 ? '' : 's' }}</small>
+                </div>
+
+                <div class="admin-shell__icon-actions">
+                  <button type="button" aria-label="View media" title="View media" (click)="openMediaViewer(asset)">
+                    <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                  </button>
+                  <button type="button" aria-label="Replace media" title="Replace media" (click)="replaceMedia(asset)">
+                    <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+                  </button>
+                  <button type="button" aria-label="Delete media" title="Delete media" (click)="setPendingDelete({ kind: 'media', id: asset.id })">
+                    <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                  </button>
+                </div>
+
+                @if (isPendingDelete('media', asset.id)) {
+                  <div class="admin-shell__inline-confirm">
+                    <span>{{ deletePromptText('media', asset) }}</span>
+                    <button type="button" (click)="deleteMedia(asset)">Delete</button>
+                    <button type="button" (click)="setPendingDelete(null)">Cancel</button>
+                  </div>
+                }
+              </article>
+            }
+          </div>
+        } @else {
+          <p class="admin-shell__empty">No media matched the current filter.</p>
+        }
+
+        <app-admin-pagination
+          [currentPage]="pageNumber('media')"
+          [pageSize]="8"
+          [totalItems]="filteredMediaAssets.length"
+          (pageChange)="setPageNumber('media', $event)"
+        ></app-admin-pagination>
       </section>
     }
 
-    @if (selectedTab === 'management') {
+    @if (selectedSection === 'admissions') {
+      <section class="admin-shell__card">
+        <div class="admin-shell__card-head">
+          <h3>Admission Logs</h3>
+          <p>All admission form submissions are stored in Firestore and editable from this panel.</p>
+        </div>
+
+        <div class="admin-shell__toolbar">
+          <input
+            class="admin-shell__search"
+            [ngModel]="admissionSearch"
+            (ngModelChange)="setAdmissionSearch($event)"
+            placeholder="Search by name, class, course, phone, city, or status"
+            type="search"
+          />
+        </div>
+
+        @if (paginatedAdmissionLogs.length) {
+          <div class="admin-shell__log-list">
+            @for (log of paginatedAdmissionLogs; track log.id) {
+              <article class="admin-shell__log-card">
+                <div class="admin-shell__log-main">
+                  <div>
+                    <strong>{{ log.fullName }}</strong>
+                    <p>{{ log.currentClass }} • {{ log.desiredCourse }}</p>
+                  </div>
+                  <span class="admin-shell__status">{{ statusLabel(log.status) }}</span>
+                </div>
+
+                <div class="admin-shell__log-meta">
+                  <span>{{ log.phone }}</span>
+                  <span>{{ log.city }}, {{ log.state }}</span>
+                  <span>{{ formatDate(log.createdAt) }}</span>
+                </div>
+
+                <div class="admin-shell__icon-actions">
+                  <button type="button" aria-label="View admission log" title="View admission log" (click)="openAdmissionViewer(log)">
+                    <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                  </button>
+                  <button type="button" aria-label="Edit admission log" title="Edit admission log" (click)="openAdmissionEditor(log)">
+                    <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+                  </button>
+                  <button type="button" aria-label="Delete admission log" title="Delete admission log" (click)="setPendingDelete({ kind: 'admission', id: log.id })">
+                    <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                  </button>
+                </div>
+
+                @if (isPendingDelete('admission', log.id)) {
+                  <div class="admin-shell__inline-confirm">
+                    <span>{{ deletePromptText('admission', log) }}</span>
+                    <button type="button" (click)="deleteAdmission(log)">Delete</button>
+                    <button type="button" (click)="setPendingDelete(null)">Cancel</button>
+                  </div>
+                }
+              </article>
+            }
+          </div>
+        } @else {
+          <p class="admin-shell__empty">No admission logs matched the current search.</p>
+        }
+
+        <app-admin-pagination
+          [currentPage]="pageNumber('admissions')"
+          [pageSize]="8"
+          [totalItems]="filteredAdmissionLogs.length"
+          (pageChange)="setPageNumber('admissions', $event)"
+        ></app-admin-pagination>
+      </section>
+    }
+
+    @if (selectedSection === 'contacts') {
+      <section class="admin-shell__card">
+        <div class="admin-shell__card-head">
+          <h3>Contact Log</h3>
+          <p>Every contact enquiry submitted from the website appears here in reverse chronological order.</p>
+        </div>
+
+        <div class="admin-shell__toolbar">
+          <input
+            class="admin-shell__search"
+            [ngModel]="contactSearch"
+            (ngModelChange)="setContactSearch($event)"
+            placeholder="Search by student name, class, goal, or phone"
+            type="search"
+          />
+        </div>
+
+        @if (paginatedContactLogs.length) {
+          <div class="admin-shell__log-list">
+            @for (log of paginatedContactLogs; track log.id) {
+              <article class="admin-shell__log-card">
+                <div class="admin-shell__log-main">
+                  <div>
+                    <strong>{{ log.studentName }}</strong>
+                    <p>{{ log.classLevel }} • {{ log.goal }}</p>
+                  </div>
+                  <span class="admin-shell__status admin-shell__status--soft">Contact</span>
+                </div>
+
+                <div class="admin-shell__log-meta">
+                  <span>{{ log.phone }}</span>
+                  <span>{{ formatDate(log.createdAt) }}</span>
+                </div>
+
+                <div class="admin-shell__icon-actions">
+                  <button type="button" aria-label="View contact log" title="View contact log" (click)="openContactViewer(log)">
+                    <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                  </button>
+                  <button type="button" aria-label="Delete contact log" title="Delete contact log" (click)="setPendingDelete({ kind: 'contact', id: log.id })">
+                    <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                  </button>
+                </div>
+
+                @if (isPendingDelete('contact', log.id)) {
+                  <div class="admin-shell__inline-confirm">
+                    <span>{{ deletePromptText('contact', log) }}</span>
+                    <button type="button" (click)="deleteContact(log)">Delete</button>
+                    <button type="button" (click)="setPendingDelete(null)">Cancel</button>
+                  </div>
+                }
+              </article>
+            }
+          </div>
+        } @else {
+          <p class="admin-shell__empty">No contact logs matched the current search.</p>
+        }
+
+        <app-admin-pagination
+          [currentPage]="pageNumber('contacts')"
+          [pageSize]="8"
+          [totalItems]="filteredContactLogs.length"
+          (pageChange)="setPageNumber('contacts', $event)"
+        ></app-admin-pagination>
+      </section>
+    }
+
+    @if (selectedSection === 'management') {
       <section class="admin-shell__content-grid">
         <article class="admin-shell__card">
           <div class="admin-shell__card-head">
             <h3>Backup and Export</h3>
-            <p>Download the full editable content tree as JSON.</p>
+            <p>Download the current Firestore content document as a JSON backup.</p>
           </div>
 
           <button class="admin-shell__action admin-shell__action--accent" type="button" (click)="downloadExport()">Download JSON Backup</button>
@@ -239,7 +567,7 @@
         <article class="admin-shell__card">
           <div class="admin-shell__card-head">
             <h3>Import from File</h3>
-            <p>Upload a previously exported JSON file to restore or replace the current content.</p>
+            <p>Upload a JSON backup to replace the current Firestore content tree.</p>
           </div>
 
           <input accept="application/json" type="file" (change)="handleImportFile($event)" />
@@ -248,22 +576,254 @@
         <article class="admin-shell__card admin-shell__card--wide">
           <div class="admin-shell__card-head">
             <h3>Import from JSON</h3>
-            <p>Paste a content payload directly and apply it to the site.</p>
+            <p>Paste a content payload directly and apply it to the website.</p>
           </div>
 
           <textarea [(ngModel)]="importPayload" rows="10"></textarea>
-          <button class="admin-shell__action admin-shell__action--dark" type="button" (click)="importFromTextarea()">Apply JSON Payload</button>
+          <button class="admin-shell__action admin-shell__action--dark" type="button" (click)="importFromTextarea()">
+            Apply JSON Payload
+          </button>
         </article>
 
         <article class="admin-shell__card">
           <div class="admin-shell__card-head">
-            <h3>Reset Site Content</h3>
-            <p>Restore all pages, settings, and image references to the seeded defaults.</p>
+            <h3>Restore Seeded Content</h3>
+            <p>Reset all page content and settings to the default content dataset.</p>
           </div>
 
-          <button class="admin-shell__action admin-shell__action--light" type="button" (click)="resetSiteContent()">Restore Defaults</button>
+          <button class="admin-shell__action admin-shell__action--light" type="button" (click)="resetSiteContent()">
+            Restore Defaults
+          </button>
+        </article>
+
+        <article class="admin-shell__card">
+          <div class="admin-shell__card-head">
+            <h3>Firebase Status</h3>
+            <p>Live collections currently tracked by this admin workspace.</p>
+          </div>
+
+          <ul class="admin-shell__bullet-list">
+            <li>Content document: `siteContent/main`</li>
+            <li>Media collection: `mediaLibrary` + Firebase Storage objects</li>
+            <li>Admission logs: `admissionLogs`</li>
+            <li>Contact logs: `contactLogs`</li>
+          </ul>
         </article>
       </section>
     }
   </section>
 </main>
+
+@if (mediaDialog(); as dialog) {
+  <div class="admin-modal">
+    <div class="admin-modal__backdrop" (click)="closeMediaDialog()"></div>
+    <section class="admin-modal__panel admin-modal__panel--wide">
+      <div class="admin-modal__head">
+        <div>
+          <p class="admin-shell__eyebrow">Media Libraries</p>
+          <h3>{{ dialog.title }}</h3>
+          <span>{{ dialog.description }}</span>
+        </div>
+
+        <div class="admin-modal__actions">
+          <button type="button" class="admin-shell__action admin-shell__action--accent" (click)="uploadAndSelectDialogMedia()">
+            Upload New
+          </button>
+          <button type="button" class="admin-shell__action admin-shell__action--light" (click)="closeMediaDialog()">Close</button>
+        </div>
+      </div>
+
+      <input
+        class="admin-shell__search"
+        [ngModel]="mediaPickerSearch"
+        (ngModelChange)="setMediaPickerSearch($event)"
+        placeholder="Search current media library"
+        type="search"
+      />
+
+      @if (dialogMediaAssets.length) {
+        <div class="admin-shell__record-grid">
+          @for (asset of dialogMediaAssets; track asset.id) {
+            <article class="admin-shell__record-card">
+              <div class="admin-shell__media-preview">
+                @if (isPreviewableImage(asset)) {
+                  <img [alt]="asset.name" [src]="asset.url" />
+                } @else {
+                  <div class="admin-shell__media-placeholder">
+                    <i
+                      [class]="asset.kind === 'document' ? 'fa-regular fa-file-lines' : 'fa-regular fa-file'"
+                      aria-hidden="true"
+                    ></i>
+                  </div>
+                }
+              </div>
+
+              <div class="admin-shell__record-copy">
+                <strong>{{ asset.name }}</strong>
+                <p>{{ asset.kind }} • {{ formatFileSize(asset.size) }}</p>
+              </div>
+
+              <div class="admin-shell__dialog-actions">
+                <button type="button" class="admin-shell__action admin-shell__action--light" (click)="openMediaViewer(asset)">View</button>
+                <button type="button" class="admin-shell__action admin-shell__action--accent" (click)="selectDialogMedia(asset)">Use This</button>
+              </div>
+            </article>
+          }
+        </div>
+      } @else {
+        <p class="admin-shell__empty">No library assets matched this picker.</p>
+      }
+
+      <app-admin-pagination
+        [currentPage]="pageNumber('mediaPicker')"
+        [pageSize]="6"
+        [totalItems]="dialogMediaAssetCount"
+        (pageChange)="setPageNumber('mediaPicker', $event)"
+      ></app-admin-pagination>
+    </section>
+  </div>
+}
+
+@if (activeModal) {
+  <div class="admin-modal">
+    <div class="admin-modal__backdrop" (click)="closeModal()"></div>
+
+    @if (mediaModal; as modal) {
+      <section class="admin-modal__panel admin-modal__panel--viewer">
+        <div class="admin-modal__head">
+          <div>
+            <p class="admin-shell__eyebrow">Media Preview</p>
+            <h3>{{ modal.asset.name }}</h3>
+            <span>{{ modal.asset.kind }} • {{ formatFileSize(modal.asset.size) }} • {{ formatDate(modal.asset.updatedAt) }}</span>
+          </div>
+
+          <button type="button" class="admin-shell__action admin-shell__action--light" (click)="closeModal()">Close</button>
+        </div>
+
+        @if (isPreviewableImage(modal.asset)) {
+          <img class="admin-modal__image" [alt]="modal.asset.name" [src]="modal.asset.url" />
+        } @else if (canPreviewInFrame(modal.asset)) {
+          <iframe class="admin-modal__frame" [src]="getSafeMediaUrl(modal.asset.url)" [title]="modal.asset.name"></iframe>
+        } @else {
+          <div class="admin-modal__fallback">
+            <i class="fa-regular fa-file-lines" aria-hidden="true"></i>
+            <p>This file cannot be previewed inline.</p>
+            <a class="admin-shell__action admin-shell__action--accent" [href]="modal.asset.url" rel="noreferrer" target="_blank">Open File</a>
+          </div>
+        }
+      </section>
+    }
+
+    @if (admissionViewModal; as modal) {
+      <section class="admin-modal__panel">
+        <div class="admin-modal__head">
+          <div>
+            <p class="admin-shell__eyebrow">Admission Log</p>
+            <h3>{{ modal.log.fullName }}</h3>
+            <span>{{ formatDate(modal.log.createdAt) }}</span>
+          </div>
+
+          <button type="button" class="admin-shell__action admin-shell__action--light" (click)="closeModal()">Close</button>
+        </div>
+
+        <div class="admin-modal__detail-grid">
+          <div><strong>Current Class</strong><span>{{ modal.log.currentClass }}</span></div>
+          <div><strong>Desired Course</strong><span>{{ modal.log.desiredCourse }}</span></div>
+          <div><strong>School</strong><span>{{ modal.log.schoolName }}</span></div>
+          <div><strong>Board</strong><span>{{ modal.log.board }}</span></div>
+          <div><strong>Phone</strong><span>{{ modal.log.phone }}</span></div>
+          <div><strong>Location</strong><span>{{ modal.log.city }}, {{ modal.log.state }}</span></div>
+          <div><strong>Status</strong><span>{{ statusLabel(modal.log.status) }}</span></div>
+          <div class="admin-modal__detail-grid--wide"><strong>Admin Notes</strong><span>{{ modal.log.adminNotes || 'No notes added yet.' }}</span></div>
+        </div>
+      </section>
+    }
+
+    @if (admissionEditModal && admissionEditDraft) {
+      <section class="admin-modal__panel">
+        <div class="admin-modal__head">
+          <div>
+            <p class="admin-shell__eyebrow">Edit Admission Log</p>
+            <h3>{{ admissionEditDraft.fullName }}</h3>
+            <span>{{ formatDate(admissionEditDraft.createdAt) }}</span>
+          </div>
+
+          <div class="admin-modal__actions">
+            <button type="button" class="admin-shell__action admin-shell__action--accent" (click)="saveAdmissionEdit()">
+              {{ isSavingAdmission ? 'Saving...' : 'Save' }}
+            </button>
+            <button type="button" class="admin-shell__action admin-shell__action--light" (click)="closeModal()">Cancel</button>
+          </div>
+        </div>
+
+        <form class="admin-shell__form-grid" (ngSubmit)="saveAdmissionEdit()">
+          <label>
+            <span>Full Name</span>
+            <input [(ngModel)]="admissionEditDraft.fullName" name="fullName" type="text" />
+          </label>
+          <label>
+            <span>Current Class</span>
+            <input [(ngModel)]="admissionEditDraft.currentClass" name="currentClass" type="text" />
+          </label>
+          <label>
+            <span>Desired Course</span>
+            <input [(ngModel)]="admissionEditDraft.desiredCourse" name="desiredCourse" type="text" />
+          </label>
+          <label>
+            <span>School</span>
+            <input [(ngModel)]="admissionEditDraft.schoolName" name="schoolName" type="text" />
+          </label>
+          <label>
+            <span>Board</span>
+            <input [(ngModel)]="admissionEditDraft.board" name="board" type="text" />
+          </label>
+          <label>
+            <span>Phone</span>
+            <input [(ngModel)]="admissionEditDraft.phone" name="phone" type="tel" />
+          </label>
+          <label>
+            <span>City</span>
+            <input [(ngModel)]="admissionEditDraft.city" name="city" type="text" />
+          </label>
+          <label>
+            <span>State</span>
+            <input [(ngModel)]="admissionEditDraft.state" name="state" type="text" />
+          </label>
+          <label>
+            <span>Status</span>
+            <select [(ngModel)]="admissionEditDraft.status" name="status">
+              @for (status of admissionStatuses; track status) {
+                <option [value]="status">{{ statusLabel(status) }}</option>
+              }
+            </select>
+          </label>
+          <label class="admin-shell__form-grid--wide">
+            <span>Admin Notes</span>
+            <textarea [(ngModel)]="admissionEditDraft.adminNotes" name="adminNotes" rows="4"></textarea>
+          </label>
+        </form>
+      </section>
+    }
+
+    @if (contactModal; as modal) {
+      <section class="admin-modal__panel">
+        <div class="admin-modal__head">
+          <div>
+            <p class="admin-shell__eyebrow">Contact Log</p>
+            <h3>{{ modal.log.studentName }}</h3>
+            <span>{{ formatDate(modal.log.createdAt) }}</span>
+          </div>
+
+          <button type="button" class="admin-shell__action admin-shell__action--light" (click)="closeModal()">Close</button>
+        </div>
+
+        <div class="admin-modal__detail-grid">
+          <div><strong>Student Name</strong><span>{{ modal.log.studentName }}</span></div>
+          <div><strong>Class</strong><span>{{ modal.log.classLevel }}</span></div>
+          <div><strong>Goal</strong><span>{{ modal.log.goal }}</span></div>
+          <div><strong>Phone</strong><span>{{ modal.log.phone }}</span></div>
+        </div>
+      </section>
+    }
+  </div>
+}

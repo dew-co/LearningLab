@@ -26,12 +26,18 @@
             <div class="admission-page__field-grid admission-page__field-grid--two">
               <label class="admission-page__field">
                 <span>{{ content().admission.form.fullNameLabel }}</span>
-                <input name="fullName" [placeholder]="content().admission.form.fullNamePlaceholder" required type="text" />
+                <input
+                  [(ngModel)]="formModel.fullName"
+                  name="fullName"
+                  [placeholder]="content().admission.form.fullNamePlaceholder"
+                  required
+                  type="text"
+                />
               </label>
 
               <label class="admission-page__field">
                 <span>{{ content().admission.form.currentClassLabel }}</span>
-                <select name="currentClass" required>
+                <select [(ngModel)]="formModel.currentClass" name="currentClass" required>
                   @for (option of content().admission.form.currentClassOptions; track option; let index = $index) {
                     <option [value]="index === 0 ? '' : option">{{ option }}</option>
                   }
@@ -40,7 +46,7 @@
 
               <label class="admission-page__field admission-page__field--full">
                 <span>{{ content().admission.form.desiredCourseLabel }}</span>
-                <select name="desiredCourse" required>
+                <select [(ngModel)]="formModel.desiredCourse" name="desiredCourse" required>
                   @for (option of content().admission.form.desiredCourseOptions; track option; let index = $index) {
                     <option [value]="index === 0 ? '' : option">{{ option }}</option>
                   }
@@ -58,14 +64,20 @@
             <div class="admission-page__field-grid admission-page__field-grid--two">
               <label class="admission-page__field">
                 <span>{{ content().admission.form.previousSchoolLabel }}</span>
-                <input name="schoolName" [placeholder]="content().admission.form.previousSchoolPlaceholder" required type="text" />
+                <input
+                  [(ngModel)]="formModel.schoolName"
+                  name="schoolName"
+                  [placeholder]="content().admission.form.previousSchoolPlaceholder"
+                  required
+                  type="text"
+                />
               </label>
 
               <label class="admission-page__field">
                 <span>{{ content().admission.form.boardLabel }}</span>
-                <select name="board" required>
+                <select [(ngModel)]="formModel.board" name="board" required>
                   @for (option of content().admission.form.boardOptions; track option) {
-                    <option>{{ option }}</option>
+                    <option [value]="option">{{ option }}</option>
                   }
                 </select>
               </label>
@@ -81,23 +93,29 @@
             <div class="admission-page__field-grid admission-page__field-grid--two">
               <label class="admission-page__field">
                 <span>{{ content().admission.form.parentPhoneLabel }}</span>
-                <input name="phone" [placeholder]="content().admission.form.parentPhonePlaceholder" required type="tel" />
+                <input
+                  [(ngModel)]="formModel.phone"
+                  name="phone"
+                  [placeholder]="content().admission.form.parentPhonePlaceholder"
+                  required
+                  type="tel"
+                />
               </label>
 
               <label class="admission-page__field">
                 <span>{{ content().admission.form.cityLabel }}</span>
-                <input name="city" [placeholder]="content().admission.form.cityPlaceholder" required type="text" />
+                <input [(ngModel)]="formModel.city" name="city" [placeholder]="content().admission.form.cityPlaceholder" required type="text" />
               </label>
 
               <label class="admission-page__field admission-page__field--full">
                 <span>{{ content().admission.form.stateLabel }}</span>
-                <input name="state" [placeholder]="content().admission.form.statePlaceholder" required type="text" />
+                <input [(ngModel)]="formModel.state" name="state" [placeholder]="content().admission.form.statePlaceholder" required type="text" />
               </label>
             </div>
           </section>
 
-          <button class="admission-page__submit" type="submit">
-            <span>{{ content().admission.form.submitLabel }}</span>
+          <button class="admission-page__submit" type="submit" [disabled]="isSubmitting">
+            <span>{{ isSubmitting ? 'Submitting...' : content().admission.form.submitLabel }}</span>
             <i aria-hidden="true" class="admission-page__submit-arrow fa-solid fa-arrow-right"></i>
           </button>
 

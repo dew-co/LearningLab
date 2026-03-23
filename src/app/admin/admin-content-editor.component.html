@@ -102,7 +102,34 @@
   } @else {
     <label class="admin-editor__field">
       <span>{{ nodeLabel }}</span>
-      @if (usesTextarea(nodeRawKey, node)) {
+      @if (isMediaField(nodeRawKey, node)) {
+        <input
+          [type]="inputType(nodeRawKey)"
+          [ngModel]="node ?? ''"
+          (ngModelChange)="updatePrimitive(nodeParent, nodeKey, $event)"
+        />
+
+        <div class="admin-editor__media-actions">
+          <button
+            type="button"
+            (click)="chooseMediaFromLibrary(nodeParent, nodeKey, nodeRawKey, nodeLabel, node)"
+          >
+            Library
+          </button>
+          <button
+            type="button"
+            (click)="uploadMediaForField(nodeParent, nodeKey, nodeRawKey, node)"
+          >
+            Upload
+          </button>
+          <button
+            type="button"
+            (click)="replaceMediaForField(nodeParent, nodeKey, nodeRawKey, node)"
+          >
+            Replace
+          </button>
+        </div>
+      } @else if (usesTextarea(nodeRawKey, node)) {
         <textarea
           rows="4"
           [ngModel]="node ?? ''"
@@ -120,6 +147,10 @@
         <div class="admin-editor__image-preview">
           <img [alt]="nodeLabel + ' preview'" [src]="node || ''" />
         </div>
+      } @else if (isMediaField(nodeRawKey, node) && node) {
+        <a class="admin-editor__media-link" [href]="node || ''" rel="noreferrer" target="_blank">
+          Open linked file
+        </a>
       }
     </label>
   }

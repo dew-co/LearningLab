@@ -109,6 +109,31 @@
   min-height: 6rem;
 }
 
+.admin-editor__media-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.admin-editor__media-actions button,
+.admin-editor__media-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(29, 24, 20, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  padding: 0.45rem 0.78rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #2c241e;
+  cursor: pointer;
+}
+
+.admin-editor__media-link {
+  width: fit-content;
+}
+
 .admin-editor__field--toggle {
   grid-template-columns: 1fr auto;
   align-items: center;

@@ -20,20 +20,14 @@ export class AdminLoginPageComponent {
   private readonly toastService = inject(ToastService);
 
   readonly content = inject(SiteContentService).content;
-  readonly defaultCredentials = this.authService.getDefaultProfile();
 
-  email = this.authService.profile().email;
+  email = '';
   password = '';
+  showPassword = false;
 
   async submit(): Promise<void> {
-    const isValid = this.authService.login(this.email, this.password);
-
-    if (!isValid) {
-      this.toastService.error('Incorrect email or password.');
-      return;
-    }
-
     try {
+      await this.authService.login(this.email, this.password);
       const navigated = await this.router.navigate(['/admin']);
 
       if (!navigated) {
@@ -42,8 +36,17 @@ export class AdminLoginPageComponent {
       }
 
       this.toastService.success('Welcome back. Admin dashboard is ready.');
-    } catch {
-      this.toastService.error('Login succeeded, but admin navigation failed.');
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : 'Incorrect email or password.';
+
+      this.toastService.error(message);
     }
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 }

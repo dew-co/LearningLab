@@ -19,6 +19,9 @@ lerna-debug.log*
 
 # Local environment
 *.local
+.env
+.env.*
+public/app-env.js
 
 # IDEs and editors
 .idea/

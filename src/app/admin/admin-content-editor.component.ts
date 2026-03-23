@@ -1,6 +1,11 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
+
+import { MediaLibraryService } from '../media-library.service';
+import { ToastService } from '../toast/toast.service';
+import type { MediaKind } from '../data-records.model';
+import { AdminMediaDialogService } from './admin-media-dialog.service';
 
 type EditableRecord = Record<string, unknown>;
 
@@ -19,6 +24,10 @@ type ObjectEntry = {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminContentEditorComponent {
+  private readonly mediaLibraryService = inject(MediaLibraryService);
+  private readonly mediaDialogService = inject(AdminMediaDialogService);
+  private readonly toastService = inject(ToastService);
+
   readonly label = input.required<string>();
   readonly rawKey = input.required<string>();
   readonly model = input.required<unknown>();
@@ -109,6 +118,99 @@ export class AdminContentEditorComponent {
     );
   }
 
+  isMediaField(rawKey: string, value: unknown): boolean {
+    if (typeof value !== 'string') {
+      return false;
+    }
+
+    const normalizedKey = rawKey.toLowerCase();
+
+    return (
+      this.isImageField(rawKey, value) ||
+      /(document|file|brochure|pdf|attachment|banner)/.test(normalizedKey) ||
+      /\.(pdf|doc|docx|ppt|pptx|xls|xlsx|txt)(\?.*)?$/i.test(value)
+    );
+  }
+
+  mediaKindsForField(rawKey: string, value: unknown): MediaKind[] {
+    if (this.isImageField(rawKey, value)) {
+      return ['image'];
+    }
+
+    const normalizedKey = rawKey.toLowerCase();
+
+    if (/(document|file|brochure|pdf|attachment)/.test(normalizedKey)) {
+      return ['document', 'other'];
+    }
+
+    return ['image', 'document', 'other'];
+  }
+
+  mediaAcceptValue(rawKey: string, value: unknown): string {
+    const allowedKinds = this.mediaKindsForField(rawKey, value);
+
+    if (allowedKinds.length === 1 && allowedKinds[0] === 'image') {
+      return 'image/*';
+    }
+
+    if (allowedKinds.every((kind) => kind !== 'image')) {
+      return '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt';
+    }
+
+    return 'image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt';
+  }
+
+  async chooseMediaFromLibrary(
+    parent: unknown,
+    keyOrIndex: string | number | null,
+    rawKey: string,
+    label: string,
+    currentValue: unknown
+  ): Promise<void> {
+    const asset = await this.mediaDialogService.open({
+      title: `Select ${label}`,
+      description: 'Choose an existing item from Media Libraries.',
+      allowedKinds: this.mediaKindsForField(rawKey, currentValue),
+      currentUrl: typeof currentValue === 'string' ? currentValue : ''
+    });
+
+    if (!asset) {
+      return;
+    }
+
+    this.updatePrimitive(parent, keyOrIndex, asset.url);
+  }
+
+  async uploadMediaForField(
+    parent: unknown,
+    keyOrIndex: string | number | null,
+    rawKey: string,
+    currentValue: unknown
+  ): Promise<void> {
+    const files = await this.pickFiles(this.mediaAcceptValue(rawKey, currentValue));
+
+    if (!files.length) {
+      return;
+    }
+
+    try {
+      const asset = await this.mediaLibraryService.uploadFile(files[0]);
+      this.updatePrimitive(parent, keyOrIndex, asset.url);
+      this.toastService.success('Media uploaded and linked successfully.');
+    } catch {
+      this.toastService.error('Media upload failed.');
+    }
+  }
+
+  async replaceMediaForField(
+    parent: unknown,
+    keyOrIndex: string | number | null,
+    rawKey: string,
+    currentValue: unknown
+  ): Promise<void> {
+    await this.uploadMediaForField(parent, keyOrIndex, rawKey, currentValue);
+  }
+
   inputType(rawKey: string): string {
     const normalizedKey = rawKey.toLowerCase();
 
@@ -153,6 +255,24 @@ export class AdminContentEditorComponent {
 
   removeArrayItem(array: unknown[], index: number): void {
     array.splice(index, 1);
+  }
+
+  private pickFiles(accept: string): Promise<File[]> {
+    if (typeof document === 'undefined') {
+      return Promise.resolve([]);
+    }
+
+    return new Promise((resolve) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = accept;
+
+      input.onchange = () => {
+        resolve(Array.from(input.files ?? []));
+      };
+
+      input.click();
+    });
   }
 
   private createEmptyValue(value: unknown): unknown {
