@@ -75,7 +75,7 @@ export type LandingPageContent = {
 };
 
 export const landingPageContent: LandingPageContent = {
-  brand: 'LearningLab',
+  brand: 'TheLearningLabs',
   topBanner: 'Admissions are open for the next live batch.',
   navItems: [
     { label: 'Home', href: '#top' },
@@ -159,7 +159,7 @@ export const landingPageContent: LandingPageContent = {
       name: 'Karthik Iyer',
       detail: 'Class 10 Board Topper',
       quote:
-        "I boosted my maths score by 30% in just two months thanks to the regular tests, smart doubt support, and clear performance analysis. LearningLab truly cares about every student's growth.",
+        "I boosted my maths score by 30% in just two months thanks to the regular tests, smart doubt support, and clear performance analysis. TheLearningLabs truly cares about every student's growth.",
       avatarInitials: 'KI'
     }
   ],

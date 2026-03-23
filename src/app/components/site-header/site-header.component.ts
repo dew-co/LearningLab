@@ -36,6 +36,8 @@ export class SiteHeaderComponent implements AfterViewInit {
   readonly headerHidden = signal(false);
   readonly headerRaised = signal(false);
 
+  navbarLogoUrl = signal('https://firebasestorage.googleapis.com/v0/b/learnlabclasses.firebasestorage.app/o/Logo%20The%20learning%20Lab.png?alt=media&token=34d53b00-15d5-4237-8d9e-187468e56c66');
+
   ngAfterViewInit(): void {
     if (typeof window === 'undefined') {
       return;

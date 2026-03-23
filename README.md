@@ -1,6 +1,6 @@
-# LearningLab
+# TheLearningLabs
 
-LearningLab is a responsive Angular 21 coaching website for an online education platform. The project includes branded marketing pages, an admission request flow, legal pages, shared navigation/footer, GSAP-based motion, and a mobile-friendly layout.
+TheLearningLabs is a responsive Angular 21 coaching website for an online education platform. The project includes branded marketing pages, an admission request flow, legal pages, shared navigation/footer, GSAP-based motion, and a mobile-friendly layout.
 
 ## Pages
 
@@ -81,7 +81,7 @@ The project currently builds successfully, but Angular reports warning-level bun
 
 ## Branding
 
-This project is configured for the `LearningLab` brand in shared site configuration:
+This project is configured for the `TheLearningLabs` brand in shared site configuration:
 
 - Brand name
 - Navbar items and CTA

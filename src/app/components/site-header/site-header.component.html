@@ -7,7 +7,7 @@
   <div class="section-shell site-header__shell">
     <a class="site-header__brand" [routerLink]="brandHref()" (click)="closeMobileMenu()">
       <span class="site-header__brand-mark" aria-hidden="true">
-        <i class="fa-solid fa-book-open-reader"></i>
+        <img [src]="navbarLogoUrl()" width="259" height="57" alt="TheLearningLabs" style="border-radius: 20px;">
       </span>
       <span class="site-header__brand-name">{{ brand() }}</span>
     </a>

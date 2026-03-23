@@ -5,7 +5,7 @@ import type {
   FooterSocialLink
 } from './components/site-footer/site-footer.component';
 
-export const SITE_BRAND_NAME = 'LearningLab';
+export const SITE_BRAND_NAME = 'TheLearningLabs';
 
 export const SITE_NAV_ITEMS: HeaderLink[] = [
   { label: 'Home', path: '/home', exact: true },
@@ -33,7 +33,7 @@ export const SITE_FOOTER_QUICK_LINKS: FooterLink[] = [
 export const SITE_FOOTER_CONTACT_ITEMS: FooterContactItem[] = [
   {
     iconClass: 'fa-solid fa-location-dot',
-    value: 'LearningLab Academy Tower\nPlot 42, Knowledge Park III,\nNear Metro Station, New Delhi 110001',
+    value: 'TheLearningLabs Academy Tower\nPlot 42, Knowledge Park III,\nNear Metro Station, New Delhi 110001',
     href: 'https://maps.google.com/?q=Plot+42+Knowledge+Park+III+New+Delhi+110001',
     external: true
   },

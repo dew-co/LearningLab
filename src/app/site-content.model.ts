@@ -491,7 +491,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
     testimonialsSection: {
       titlePrefix: 'What Our',
       titleAccent: 'Students Say',
-      description: 'Real stories from students who achieved their dreams with LearningLab.',
+      description: 'Real stories from students who achieved their dreams with TheLearningLabs.',
       items: landingPageContent.testimonials
     },
     plansSection: {
@@ -821,7 +821,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
     facultySection: {
       title: 'Expert Faculty & Dedicated Mentorship',
       paragraphOne:
-        'Our teachers are not just subject experts; they are mentors. At LearningLab, we select only the top 1% of educators who have a passion for simplification and a track record of guiding students to top ranks.',
+        'Our teachers are not just subject experts; they are mentors. At TheLearningLabs, we select only the top 1% of educators who have a passion for simplification and a track record of guiding students to top ranks.',
       paragraphTwo:
         'Beyond the lectures, our mentorship program ensures that every student receives emotional and tactical support to navigate the pressures of competitive exams.',
       primaryImageSrc: 'design/mentor-c.jpg',
@@ -852,9 +852,9 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
     },
     quoteSection: {
       quote:
-        'Our dedication goes beyond syllabus completion. We are committed to the intellectual and personal growth of every student who walks through our virtual doors. At LearningLab, your ambition is our mission.',
+        'Our dedication goes beyond syllabus completion. We are committed to the intellectual and personal growth of every student who walks through our virtual doors. At TheLearningLabs, your ambition is our mission.',
       authorInitials: 'EL',
-      authorName: 'Team LearningLab',
+      authorName: 'Team TheLearningLabs',
       authorRole: 'Academic Excellence Cell'
     },
     cta: {
@@ -895,7 +895,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
     ],
     officeCard: {
       label: 'Head Office',
-      title: 'LearningLab Academy Tower',
+      title: 'TheLearningLabs Academy Tower',
       address: 'Plot 42, Knowledge Park III, Near Metro Station, New Delhi, 110001, India',
       emphasis: 'Available Nationwide via Online Access'
     },
@@ -903,8 +903,8 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
       title: 'Find us on the Map',
       embedUrl: 'https://www.google.com/maps?q=Plot%2042,%20Knowledge%20Park%20III,%20Near%20Metro%20Station,%20New%20Delhi%20110001&z=15&output=embed',
       externalUrl: 'https://www.google.com/maps/search/?api=1&query=Plot+42,+Knowledge+Park+III,+Near+Metro+Station,+New+Delhi+110001',
-      iframeTitle: 'LearningLab office map',
-      cardTitle: 'LearningLab HQ',
+      iframeTitle: 'TheLearningLabs office map',
+      cardTitle: 'TheLearningLabs HQ',
       cardDescription: 'Open in Google Maps'
     },
     cta: {
@@ -979,7 +979,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
     promoCard: {
       imageSrc: 'design/mentor-b.jpg',
       imageAlt: 'Academic mentor counseling students',
-      title: 'Experience the LearningLab Advantage',
+      title: 'Experience the TheLearningLabs Advantage',
       description: 'Live labs, expert faculty, and peer learning.'
     },
     cta: {
@@ -1014,7 +1014,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
   legal: {
     privacy: {
       eyebrow: 'Privacy Policy',
-      title: 'How LearningLab handles your information',
+      title: 'How TheLearningLabs handles your information',
       summary:
         'We collect only the information needed to deliver admissions support, live classes, performance tracking, and student communication securely.',
       updatedAt: 'Last updated: March 12, 2026',
@@ -1044,7 +1044,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
     },
     terms: {
       eyebrow: 'Terms of Service',
-      title: 'Rules for using LearningLab services',
+      title: 'Rules for using TheLearningLabs services',
       summary:
         'These terms govern access to our website, live classes, academic materials, and counseling services. By using the platform, you agree to comply with them.',
       updatedAt: 'Last updated: March 12, 2026',
@@ -1067,7 +1067,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
           heading: 'Conduct and limitations',
           body: [
             'Users must not misuse the website or learning systems, interfere with classes, attempt unauthorized access, or upload harmful content.',
-            'LearningLab is not liable for interruptions caused by third-party infrastructure, device issues, or internet connectivity problems outside our direct control.'
+            'TheLearningLabs is not liable for interruptions caused by third-party infrastructure, device issues, or internet connectivity problems outside our direct control.'
           ]
         }
       ]
