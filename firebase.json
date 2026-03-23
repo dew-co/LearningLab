@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "dist",
+    "public": "dist/coaching-website/browser",
     "ignore": [
       "firebase.json",
       "**/.*",
