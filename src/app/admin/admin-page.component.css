@@ -73,11 +73,11 @@
 }
 
 .admin-shell__brand-mark {
-  width: 3rem;
-  height: 3rem;
-  border-radius: 1rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.82rem;
   background: linear-gradient(135deg, rgba(234, 122, 21, 0.34), rgba(255, 255, 255, 0.08));
-  padding: 0.32rem;
+  padding: 0.24rem;
   overflow: hidden;
 }
 
@@ -85,7 +85,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 0.72rem;
+  border-radius: 0.58rem;
 }
 
 .admin-shell__brand-copy {
@@ -94,19 +94,20 @@
 
 .admin-shell__rail-toggle {
   position: absolute;
-  top: 1.45rem;
-  right: -1.4rem;
+  top: 1.1rem;
+  right: -1rem;
   z-index: 6;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.9rem;
-  height: 2.9rem;
-  border: 2px solid rgba(255, 255, 255, 0.72);
+  width: 2rem;
+  height: 2rem;
+  border: 1.25px solid rgba(255, 255, 255, 0.72);
   border-radius: 999px;
   background: linear-gradient(180deg, rgba(38, 30, 24, 0.98), rgba(26, 21, 17, 0.98));
   color: #fff;
-  box-shadow: 0 16px 28px rgba(20, 17, 14, 0.28);
+  font-size: 0.68rem;
+  box-shadow: 0 10px 18px rgba(20, 17, 14, 0.22);
   cursor: pointer;
   transition:
     transform 180ms ease,
@@ -118,7 +119,7 @@
 .admin-shell__rail-toggle:hover {
   transform: translateY(-1px);
   border-color: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 18px 30px rgba(20, 17, 14, 0.34);
+  box-shadow: 0 12px 20px rgba(20, 17, 14, 0.26);
 }
 
 .admin-shell__eyebrow {
@@ -179,12 +180,12 @@
 .admin-shell__nav-button {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: 0.8rem;
+  gap: 0.58rem;
   align-items: center;
   border: 1px solid transparent;
-  border-radius: 1rem;
+  border-radius: 0.9rem;
   background: transparent;
-  padding: 0.76rem 0.82rem;
+  padding: 0.6rem 0.68rem;
   color: rgba(251, 247, 242, 0.84);
   cursor: pointer;
   text-align: left;
@@ -203,11 +204,11 @@
 }
 
 .admin-shell__nav-icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.85rem;
+  width: 1.95rem;
+  height: 1.95rem;
+  border-radius: 0.68rem;
   background: rgba(255, 255, 255, 0.06);
-  font-size: 0.98rem;
+  font-size: 0.76rem;
 }
 
 .admin-shell__nav-meta {
@@ -215,7 +216,7 @@
 }
 
 .admin-shell__nav-label {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 800;
   color: #fff;
 }
@@ -290,12 +291,12 @@
 }
 
 .admin-shell__section-icon {
-  width: 2.8rem;
-  height: 2.8rem;
-  border-radius: 0.95rem;
+  width: 2.28rem;
+  height: 2.28rem;
+  border-radius: 0.76rem;
   background: linear-gradient(135deg, rgba(234, 122, 21, 0.14), rgba(255, 255, 255, 0.94));
   color: var(--admin-accent-dark);
-  font-size: 1rem;
+  font-size: 0.84rem;
 }
 
 .admin-shell__topbar-copy {
@@ -352,10 +353,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.7rem;
-  height: 2.7rem;
+  width: 2.4rem;
+  height: 2.4rem;
   border: 1px solid transparent;
-  border-radius: 0.95rem;
+  border-radius: 0.82rem;
+  font-size: 0.82rem;
   cursor: pointer;
 }
 
@@ -374,11 +376,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.42rem;
   border: 1px solid transparent;
   border-radius: 999px;
-  padding: 0.76rem 1rem;
-  font-size: 0.76rem;
+  padding: 0.68rem 0.92rem;
+  font-size: 0.73rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -428,9 +430,9 @@
 .admin-shell__section-stat-icon,
 .admin-shell__metric-icon,
 .admin-shell__card-icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.9rem;
+  width: 2.3rem;
+  height: 2.3rem;
+  border-radius: 0.78rem;
   background: linear-gradient(135deg, rgba(234, 122, 21, 0.14), rgba(255, 255, 255, 0.94));
   color: var(--admin-accent-dark);
 }
@@ -697,6 +699,41 @@
   cursor: pointer;
 }
 
+.admin-shell__icon-action {
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.admin-shell__icon-action i {
+  font-size: 0.84rem;
+}
+
+.admin-shell__icon-action:hover {
+  transform: translateY(-1px);
+}
+
+.admin-shell__icon-action--view {
+  border-color: rgba(29, 24, 20, 0.12) !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  color: #4f453e !important;
+}
+
+.admin-shell__icon-action--replace {
+  border-color: rgba(234, 122, 21, 0.22) !important;
+  background: rgba(234, 122, 21, 0.12) !important;
+  color: var(--admin-accent-dark) !important;
+}
+
+.admin-shell__icon-action--delete {
+  border-color: rgba(220, 38, 38, 0.2) !important;
+  background: rgba(220, 38, 38, 0.1) !important;
+  color: #c62828 !important;
+}
+
 .admin-shell__option-add button {
   display: inline-flex;
   align-items: center;
@@ -801,26 +838,79 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.admin-shell__record-grid--picker {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
 .admin-shell__record-card,
 .admin-shell__log-card {
   border-radius: 1.05rem;
   padding: 0.92rem;
 }
 
+.admin-shell__record-card--picker {
+  border-radius: 0.95rem;
+  padding: 0.72rem;
+}
+
+.admin-shell__record-card--picker .admin-shell__media-preview {
+  aspect-ratio: 4 / 3;
+  margin-bottom: 0.6rem;
+  padding: 0.42rem;
+}
+
+.admin-shell__record-copy--picker {
+  display: grid;
+  gap: 0.14rem;
+}
+
+.admin-shell__record-copy--picker strong {
+  display: block;
+  overflow: hidden;
+  font-size: 0.89rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.admin-shell__record-copy--picker p {
+  margin: 0;
+  font-size: 0.77rem;
+  line-height: 1.4;
+}
+
 .admin-shell__media-preview {
+  display: grid;
+  place-items: center;
   overflow: hidden;
   border: 1px solid rgba(29, 24, 20, 0.08);
   border-radius: 0.95rem;
   background: linear-gradient(135deg, #fceddf, #f7fafc);
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 16 / 9;
   margin-bottom: 0.78rem;
+  padding: 0.58rem;
 }
 
-.admin-shell__media-preview img,
+.admin-shell__media-preview img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  border-radius: 0.78rem;
+  object-fit: contain;
+}
+
 .admin-modal__image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  display: block;
+  max-width: 100%;
+  max-height: min(68vh, 540px);
+  width: auto;
+  height: auto;
+  margin-inline: auto;
+  border: 1px solid var(--admin-border);
+  border-radius: 1rem;
+  padding: 0.5rem;
 }
 
 .admin-shell__media-placeholder,
@@ -851,11 +941,20 @@
 .admin-shell__inline-confirm {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
   margin-top: 0.8rem;
   border-top: 1px solid var(--admin-border);
   padding-top: 0.75rem;
+}
+
+.admin-shell__inline-confirm--warning {
+  border-top-color: rgba(234, 122, 21, 0.2);
+}
+
+.admin-shell__inline-confirm-copy {
+  flex: 1 1 14rem;
+  min-width: 0;
 }
 
 .admin-shell__inline-confirm span {
@@ -863,6 +962,39 @@
   color: var(--admin-muted);
   font-size: 0.84rem;
   line-height: 1.5;
+}
+
+.admin-shell__inline-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin-top: 0.5rem;
+  border-radius: 0.9rem;
+  background: rgba(234, 122, 21, 0.08);
+  padding: 0.68rem 0.78rem;
+}
+
+.admin-shell__inline-warning i {
+  margin-top: 0.08rem;
+  color: var(--admin-accent-dark);
+}
+
+.admin-shell__inline-warning strong {
+  display: block;
+  margin-bottom: 0.32rem;
+  color: var(--admin-text);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-shell__inline-attachment-list {
+  margin: 0;
+  padding-left: 1rem;
+  color: var(--admin-text);
+  font-size: 0.82rem;
+  line-height: 1.55;
 }
 
 .admin-shell__inline-confirm button {
@@ -873,6 +1005,16 @@
   font-size: 0.76rem;
   font-weight: 700;
   cursor: pointer;
+}
+
+.admin-shell__inline-confirm-button--danger {
+  border-color: rgba(220, 38, 38, 0.2) !important;
+  background: rgba(220, 38, 38, 0.1) !important;
+  color: #b42318 !important;
+}
+
+.admin-shell__inline-confirm-button--neutral {
+  color: var(--admin-text) !important;
 }
 
 .admin-shell__log-main {
@@ -960,8 +1102,13 @@
   width: min(1080px, 100%);
 }
 
+.admin-modal__panel--picker {
+  width: min(1160px, 100%);
+  padding: 0.9rem;
+}
+
 .admin-modal__panel--viewer {
-  width: min(960px, 100%);
+  width: min(820px, 100%);
 }
 
 .admin-modal__head {
@@ -979,9 +1126,39 @@
   letter-spacing: -0.04em;
 }
 
+.admin-modal__picker-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.admin-shell__search-field--picker {
+  flex: 1 1 auto;
+}
+
+.admin-shell__search--picker {
+  padding-top: 0.74rem;
+  padding-bottom: 0.74rem;
+}
+
+.admin-modal__picker-count {
+  flex: 0 0 auto;
+  border: 1px solid var(--admin-border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.84);
+  padding: 0.52rem 0.8rem;
+  color: var(--admin-muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
 .admin-modal__frame {
   width: 100%;
-  min-height: 70vh;
+  height: min(68vh, 540px);
+  min-height: min(68vh, 540px);
   border: 0;
   border-radius: 1rem;
   background: #fff;
@@ -1024,6 +1201,19 @@
 .admin-shell__dialog-actions {
   justify-content: space-between;
   margin-top: 0.75rem;
+}
+
+.admin-shell__dialog-actions--picker {
+  gap: 0.42rem;
+  margin-top: 0.6rem;
+}
+
+.admin-shell__dialog-actions--picker .admin-shell__action {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.54rem 0.72rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
 }
 
 .admin-shell__blog-copy {
@@ -1104,15 +1294,15 @@
 }
 
 .admin-shell--sidebar-collapsed .admin-shell__rail-toggle {
-  right: -1.45rem;
+  right: -1.02rem;
 }
 
 .admin-shell--sidebar-collapsed .admin-shell__nav-button {
   grid-template-columns: 1fr;
   justify-items: center;
-  gap: 0.45rem;
-  padding: 0.68rem 0.3rem;
-  border-radius: 0.9rem;
+  gap: 0.32rem;
+  padding: 0.48rem 0.18rem;
+  border-radius: 0.82rem;
 }
 
 @media (max-width: 1320px) {
@@ -1125,6 +1315,10 @@
   .admin-shell__record-grid,
   .admin-shell__other-content {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-shell__record-grid--picker {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -1177,6 +1371,15 @@
 
   .admin-shell__topbar-main {
     grid-template-columns: 1fr;
+  }
+
+  .admin-modal__picker-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-modal__picker-count {
+    align-self: flex-start;
   }
 
   .admin-shell__section-strip,

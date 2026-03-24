@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, effect, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, computed, effect, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
@@ -71,6 +71,11 @@ type SectionInsight = {
   icon: string;
   label: string;
   value: string;
+};
+
+type MediaAttachmentSummary = {
+  referenceCount: number;
+  locations: string[];
 };
 
 type DeleteTarget =
@@ -306,6 +311,7 @@ const ADMISSION_OPTION_FIELDS: AdmissionOptionField[] = [
 
 const ADMIN_SIDEBAR_STORAGE_KEY = 'learninglabs-admin-sidebar-collapsed';
 const ADMIN_DESKTOP_BREAKPOINT = 1180;
+const MEDIA_REFERENCE_VALUE_RE = /\.(png|jpe?g|webp|gif|svg|pdf|docx?|pptx?|xlsx?|txt)(\?.*)?$/i;
 
 @Component({
   selector: 'app-admin-page',
@@ -344,6 +350,9 @@ export class AdminPageComponent {
     'https://firebasestorage.googleapis.com/v0/b/learnlabclasses.firebasestorage.app/o/Logo%20The%20learning%20Lab.png?alt=media&token=34d53b00-15d5-4237-8d9e-187468e56c66';
 
   readonly defaultContent = this.contentService.getDefaultContent();
+  readonly mediaAttachmentIndex = computed(() =>
+    this.buildMediaAttachmentIndex(this.contentService.content(), this.blogService.posts())
+  );
 
   selectedSection: AdminSectionKey = 'dashboard';
   selectedPageKey: PageKey = 'home';
@@ -581,8 +590,19 @@ export class AdminPageComponent {
     this.isUploadingMedia = true;
 
     try {
-      await this.mediaLibraryService.uploadFiles(files);
-      this.toastService.success(`${files.length} media item${files.length > 1 ? 's were' : ' was'} uploaded.`);
+      const { uploaded, duplicates } = await this.mediaLibraryService.uploadFiles(files);
+
+      if (uploaded.length) {
+        this.toastService.success(`${uploaded.length} media item${uploaded.length > 1 ? 's were' : ' was'} uploaded.`);
+      }
+
+      if (duplicates.length) {
+        this.toastService.info(
+          duplicates.length === files.length
+            ? 'Duplicate upload skipped. The selected files are already in Media Libraries.'
+            : `${duplicates.length} duplicate file${duplicates.length > 1 ? 's were' : ' was'} skipped.`
+        );
+      }
     } catch {
       this.toastService.error('Media upload failed.');
     } finally {
@@ -600,7 +620,11 @@ export class AdminPageComponent {
 
     try {
       const updatedAsset = await this.mediaLibraryService.replaceAsset(asset, files[0]);
-      const replacedReferences = await this.contentService.replaceMediaReferences(asset.url, updatedAsset.url);
+      const [replacedContentReferences, replacedBlogReferences] = await Promise.all([
+        this.contentService.replaceMediaReferences(asset.url, updatedAsset.url),
+        this.blogService.replaceMediaReferences(asset.url, updatedAsset.url)
+      ]);
+      const replacedReferences = replacedContentReferences + replacedBlogReferences;
 
       this.toastService.success(
         replacedReferences > 0
@@ -748,9 +772,13 @@ export class AdminPageComponent {
     }
 
     try {
-      const asset = await this.mediaLibraryService.uploadFile(files[0]);
-      this.blogEditDraft.coverImageSrc = asset.url;
-      this.toastService.success('Cover image uploaded to Media Libraries.');
+      const result = await this.mediaLibraryService.uploadFile(files[0]);
+      this.blogEditDraft.coverImageSrc = result.asset.url;
+      this.toastService[result.isDuplicate ? 'info' : 'success'](
+        result.isDuplicate
+          ? 'This image already exists in Media Libraries. The existing asset was linked.'
+          : 'Cover image uploaded to Media Libraries.'
+      );
     } catch {
       this.toastService.error('Cover image upload failed.');
     }
@@ -883,9 +911,13 @@ export class AdminPageComponent {
     }
 
     try {
-      const asset = await this.mediaLibraryService.uploadFile(files[0]);
-      this.toastService.success('Media uploaded to the shared library.');
-      this.selectDialogMedia(asset);
+      const result = await this.mediaLibraryService.uploadFile(files[0]);
+      this.toastService[result.isDuplicate ? 'info' : 'success'](
+        result.isDuplicate
+          ? 'This file already exists in Media Libraries. The existing asset was selected.'
+          : 'Media uploaded to the shared library.'
+      );
+      this.selectDialogMedia(result.asset);
     } catch {
       this.toastService.error('Media upload failed.');
     }
@@ -1135,7 +1167,7 @@ export class AdminPageComponent {
         return matchesKind && matchesSearch;
       }),
       'mediaPicker',
-      6
+      8
     );
   }
 
@@ -1274,15 +1306,19 @@ export class AdminPageComponent {
   }
 
   mediaReferenceCount(asset: MediaAsset): number {
-    return this.contentService.countMediaReferences(asset.url);
+    return this.mediaAttachmentIndex().get(asset.url)?.referenceCount ?? 0;
+  }
+
+  mediaAttachmentLocations(asset: MediaAsset): string[] {
+    return this.mediaAttachmentIndex().get(asset.url)?.locations ?? [];
   }
 
   deletePromptText(kind: DeleteKind, assetOrLog: MediaAsset | BlogPost | AdmissionLog | ContactLog): string {
     if (kind === 'media') {
       const asset = assetOrLog as MediaAsset;
-      const referenceCount = this.mediaReferenceCount(asset);
-      return referenceCount > 0
-        ? `Delete this asset? ${referenceCount} content reference${referenceCount > 1 ? 's still point to it.' : ' still points to it.'}`
+      const attachmentLocations = this.mediaAttachmentLocations(asset);
+      return attachmentLocations.length > 0
+        ? `Delete this asset? It is still attached in ${attachmentLocations.length} section${attachmentLocations.length > 1 ? 's' : ''}.`
         : 'Delete this asset from the media library?';
     }
 
@@ -1432,6 +1468,114 @@ export class AdminPageComponent {
     }
 
     return 0;
+  }
+
+  private buildMediaAttachmentIndex(content: SiteContent, posts: BlogPost[]): Map<string, MediaAttachmentSummary> {
+    const index = new Map<string, { referenceCount: number; locations: Map<string, number> }>();
+    const register = (value: string, label: string) => {
+      const normalizedValue = value.trim();
+
+      if (!this.isMediaReferenceValue(normalizedValue)) {
+        return;
+      }
+
+      const entry = index.get(normalizedValue) ?? {
+        referenceCount: 0,
+        locations: new Map<string, number>()
+      };
+
+      entry.referenceCount += 1;
+      entry.locations.set(label, (entry.locations.get(label) ?? 0) + 1);
+      index.set(normalizedValue, entry);
+    };
+
+    Object.entries(content as Record<string, unknown>).forEach(([rootKey, rootValue]) => {
+      this.walkMediaReferences(rootValue, [rootKey], register);
+    });
+
+    posts.forEach((post) => {
+      if (post.coverImageSrc.trim()) {
+        const blogLabel = post.title.trim() || post.slug.trim() || 'Untitled post';
+        register(post.coverImageSrc, `Blogs > ${blogLabel} cover image`);
+      }
+    });
+
+    return new Map(
+      Array.from(index.entries()).map(([url, entry]) => [
+        url,
+        {
+          referenceCount: entry.referenceCount,
+          locations: Array.from(entry.locations.entries())
+            .sort(([leftLabel], [rightLabel]) => leftLabel.localeCompare(rightLabel))
+            .map(([label, count]) => (count > 1 ? `${label} (${count})` : label))
+        }
+      ])
+    );
+  }
+
+  private walkMediaReferences(
+    node: unknown,
+    path: string[],
+    register: (value: string, label: string) => void
+  ): void {
+    if (typeof node === 'string') {
+      register(node, this.describeMediaReferencePath(path));
+      return;
+    }
+
+    if (Array.isArray(node)) {
+      node.forEach((entry, index) => this.walkMediaReferences(entry, [...path, String(index)], register));
+      return;
+    }
+
+    if (typeof node === 'object' && node !== null) {
+      Object.entries(node).forEach(([key, value]) => this.walkMediaReferences(value, [...path, key], register));
+    }
+  }
+
+  private describeMediaReferencePath(path: string[]): string {
+    const [rootKey, sectionKey] = path;
+
+    if (rootKey === 'site') {
+      return 'Site Settings';
+    }
+
+    if (rootKey === 'admissionThankYou') {
+      return 'Thank You > Page Content';
+    }
+
+    if (rootKey === 'legal') {
+      if (sectionKey === 'privacy') {
+        return 'Legal > Privacy Policy';
+      }
+
+      if (sectionKey === 'terms') {
+        return 'Legal > Terms of Service';
+      }
+
+      return 'Legal';
+    }
+
+    const page = this.pageConfigs.find((entry) => entry.key === rootKey);
+
+    if (!page) {
+      return this.humanizeKey(rootKey ?? 'Content');
+    }
+
+    const section = page.sections.find((entry) => entry.key === sectionKey);
+    return section ? `${page.label} > ${section.label}` : page.label;
+  }
+
+  private isMediaReferenceValue(value: string): boolean {
+    return MEDIA_REFERENCE_VALUE_RE.test(value);
+  }
+
+  private humanizeKey(value: string): string {
+    return value
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .replace(/^\w/, (character) => character.toUpperCase());
   }
 
   private pickFiles(accept: string, multiple = false): Promise<File[]> {

@@ -305,9 +305,13 @@ export class AdminContentEditorComponent {
     }
 
     try {
-      const asset = await this.mediaLibraryService.uploadFile(files[0]);
-      this.updatePrimitive(parent, keyOrIndex, asset.url);
-      this.toastService.success('Media uploaded and linked successfully.');
+      const result = await this.mediaLibraryService.uploadFile(files[0]);
+      this.updatePrimitive(parent, keyOrIndex, result.asset.url);
+      this.toastService[result.isDuplicate ? 'info' : 'success'](
+        result.isDuplicate
+          ? 'This file already exists in Media Libraries. The existing asset was linked.'
+          : 'Media uploaded and linked successfully.'
+      );
     } catch {
       this.toastService.error('Media upload failed.');
     }

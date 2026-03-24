@@ -8,6 +8,7 @@ export type MediaAsset = {
   kind: MediaKind;
   contentType: string;
   extension: string;
+  checksum?: string;
   size: number;
   createdAt: number;
   updatedAt: number;

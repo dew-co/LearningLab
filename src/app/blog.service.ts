@@ -114,6 +114,24 @@ export class BlogService {
     await updateDoc(doc(this.collectionRef, id), nextUpdates);
   }
 
+  async replaceMediaReferences(currentValue: string, nextValue: string): Promise<number> {
+    if (!currentValue || !nextValue || currentValue === nextValue) {
+      return 0;
+    }
+
+    const matchedPosts = this.posts().filter((post) => post.coverImageSrc === currentValue);
+
+    await Promise.all(
+      matchedPosts.map((post) =>
+        this.updatePost(post.id, {
+          coverImageSrc: nextValue
+        })
+      )
+    );
+
+    return matchedPosts.length;
+  }
+
   async deletePost(id: string): Promise<void> {
     await deleteDoc(doc(this.collectionRef, id));
   }

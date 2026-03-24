@@ -85,7 +85,6 @@
         @if (selectedSection === 'pages' || selectedSection === 'settings') {
           <button class="admin-shell__action admin-shell__action--light" type="button" (click)="discardChanges()">
             <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
-            <span>Discard Draft</span>
           </button>
           <button class="admin-shell__action admin-shell__action--accent" type="button" (click)="saveContent()">
             <i class="fa-regular fa-floppy-disk" aria-hidden="true"></i>
@@ -109,7 +108,6 @@
 
         <button class="admin-shell__action admin-shell__action--dark" type="button" (click)="logout()">
           <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
-          <span>Logout</span>
         </button>
       </div>
     </header>
@@ -531,22 +529,74 @@
                 </div>
 
                 <div class="admin-shell__icon-actions">
-                  <button type="button" aria-label="View media" title="View media" (click)="openMediaViewer(asset)">
+                  <button
+                    type="button"
+                    class="admin-shell__icon-action admin-shell__icon-action--view"
+                    aria-label="View media"
+                    title="View media"
+                    (click)="openMediaViewer(asset)"
+                  >
                     <i class="fa-regular fa-eye" aria-hidden="true"></i>
                   </button>
-                  <button type="button" aria-label="Replace media" title="Replace media" (click)="replaceMedia(asset)">
+                  <button
+                    type="button"
+                    class="admin-shell__icon-action admin-shell__icon-action--replace"
+                    aria-label="Replace media"
+                    title="Replace media"
+                    (click)="replaceMedia(asset)"
+                  >
                     <i class="fa-solid fa-rotate" aria-hidden="true"></i>
                   </button>
-                  <button type="button" aria-label="Delete media" title="Delete media" (click)="setPendingDelete({ kind: 'media', id: asset.id })">
+                  <button
+                    type="button"
+                    class="admin-shell__icon-action admin-shell__icon-action--delete"
+                    aria-label="Delete media"
+                    title="Delete media"
+                    (click)="setPendingDelete({ kind: 'media', id: asset.id })"
+                  >
                     <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
                   </button>
                 </div>
 
                 @if (isPendingDelete('media', asset.id)) {
-                  <div class="admin-shell__inline-confirm">
-                    <span>{{ deletePromptText('media', asset) }}</span>
-                    <button type="button" (click)="deleteMedia(asset)">Delete</button>
-                    <button type="button" (click)="setPendingDelete(null)">Cancel</button>
+                  <div
+                    class="admin-shell__inline-confirm"
+                    [class.admin-shell__inline-confirm--warning]="mediaAttachmentLocations(asset).length > 0"
+                  >
+                    <div class="admin-shell__inline-confirm-copy">
+                      <span>{{ deletePromptText('media', asset) }}</span>
+
+                      @if (mediaAttachmentLocations(asset).length) {
+                        <div class="admin-shell__inline-warning">
+                          <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+
+                          <div>
+                            <strong>Attached in</strong>
+
+                            <ul class="admin-shell__inline-attachment-list">
+                              @for (location of mediaAttachmentLocations(asset); track location) {
+                                <li>{{ location }}</li>
+                              }
+                            </ul>
+                          </div>
+                        </div>
+                      }
+                    </div>
+
+                    <button
+                      type="button"
+                      class="admin-shell__inline-confirm-button admin-shell__inline-confirm-button--danger"
+                      (click)="deleteMedia(asset)"
+                    >
+                      Delete
+                    </button>
+                    <button
+                      type="button"
+                      class="admin-shell__inline-confirm-button admin-shell__inline-confirm-button--neutral"
+                      (click)="setPendingDelete(null)"
+                    >
+                      Cancel
+                    </button>
                   </div>
                 }
               </article>
@@ -892,7 +942,7 @@
 @if (mediaDialog(); as dialog) {
   <div class="admin-modal">
     <div class="admin-modal__backdrop" (click)="closeMediaDialog()"></div>
-    <section class="admin-modal__panel admin-modal__panel--wide">
+    <section class="admin-modal__panel admin-modal__panel--wide admin-modal__panel--picker">
       <div class="admin-modal__head">
         <div>
           <p class="admin-shell__eyebrow">Media Libraries</p>
@@ -912,21 +962,27 @@
         </div>
       </div>
 
-      <div class="admin-shell__search-field">
-        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-        <input
-          class="admin-shell__search"
-          [ngModel]="mediaPickerSearch"
-          (ngModelChange)="setMediaPickerSearch($event)"
-          placeholder="Search current media library"
-          type="search"
-        />
+      <div class="admin-modal__picker-toolbar">
+        <div class="admin-shell__search-field admin-shell__search-field--picker">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+          <input
+            class="admin-shell__search admin-shell__search--picker"
+            [ngModel]="mediaPickerSearch"
+            (ngModelChange)="setMediaPickerSearch($event)"
+            placeholder="Search current media library"
+            type="search"
+          />
+        </div>
+
+        <div class="admin-modal__picker-count">
+          {{ dialogMediaAssetCount }} item{{ dialogMediaAssetCount === 1 ? '' : 's' }}
+        </div>
       </div>
 
       @if (dialogMediaAssets.length) {
-        <div class="admin-shell__record-grid">
+        <div class="admin-shell__record-grid admin-shell__record-grid--picker">
           @for (asset of dialogMediaAssets; track asset.id) {
-            <article class="admin-shell__record-card">
+            <article class="admin-shell__record-card admin-shell__record-card--picker">
               <div class="admin-shell__media-preview">
                 @if (isPreviewableImage(asset)) {
                   <img [alt]="asset.name" [src]="asset.url" />
@@ -940,19 +996,19 @@
                 }
               </div>
 
-              <div class="admin-shell__record-copy">
-                <strong>{{ asset.name }}</strong>
+              <div class="admin-shell__record-copy admin-shell__record-copy--picker">
+                <strong [attr.title]="asset.name">{{ asset.name }}</strong>
                 <p>{{ asset.kind }} • {{ formatFileSize(asset.size) }}</p>
               </div>
 
-              <div class="admin-shell__dialog-actions">
+              <div class="admin-shell__dialog-actions admin-shell__dialog-actions--picker">
                 <button type="button" class="admin-shell__action admin-shell__action--light" (click)="openMediaViewer(asset)">
                   <i class="fa-regular fa-eye" aria-hidden="true"></i>
-                  <span>View</span>
+                  <span>Preview</span>
                 </button>
                 <button type="button" class="admin-shell__action admin-shell__action--accent" (click)="selectDialogMedia(asset)">
                   <i class="fa-solid fa-check" aria-hidden="true"></i>
-                  <span>Use This</span>
+                  <span>Select</span>
                 </button>
               </div>
             </article>
@@ -964,7 +1020,7 @@
 
       <app-admin-pagination
         [currentPage]="pageNumber('mediaPicker')"
-        [pageSize]="6"
+        [pageSize]="8"
         [totalItems]="dialogMediaAssetCount"
         (pageChange)="setPageNumber('mediaPicker', $event)"
       ></app-admin-pagination>
