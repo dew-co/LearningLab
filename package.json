@@ -1,6 +1,6 @@
 {
   "name": "learninglabs",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "scripts": {
     "prestart": "node scripts/write-app-env.mjs",
     "prebuild": "node scripts/write-app-env.mjs",

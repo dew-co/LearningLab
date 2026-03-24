@@ -44,3 +44,22 @@ export type ContactLog = {
 };
 
 export type ContactLogInput = Omit<ContactLog, 'id' | 'createdAt' | 'updatedAt'>;
+
+export type BlogPost = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  coverImageSrc: string;
+  coverImageAlt: string;
+  authorName: string;
+  isPublished: boolean;
+  publishedAt: number;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type BlogPostInput = Omit<BlogPost, 'id' | 'createdAt' | 'updatedAt' | 'publishedAt'> & {
+  publishedAt?: number;
+};

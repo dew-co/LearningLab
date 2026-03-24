@@ -63,6 +63,12 @@
           </button>
         }
 
+        @if (selectedSection === 'blogs') {
+          <button class="admin-shell__action admin-shell__action--accent" type="button" (click)="openBlogCreator()">
+            New Blog
+          </button>
+        }
+
         <button class="admin-shell__action admin-shell__action--dark" type="button" (click)="logout()">Logout</button>
       </div>
     </header>
@@ -85,6 +91,12 @@
           <p>Media Assets</p>
           <strong>{{ mediaCount }}</strong>
           <span>Shared images and documents stored in Media Libraries.</span>
+        </article>
+
+        <article class="admin-shell__metric">
+          <p>Blog Posts</p>
+          <strong>{{ blogCount }}</strong>
+          <span>Draft and published posts powering the Blogs page.</span>
         </article>
 
         <article class="admin-shell__metric">
@@ -417,6 +429,78 @@
       </section>
     }
 
+    @if (selectedSection === 'blogs') {
+      <section class="admin-shell__card">
+        <div class="admin-shell__card-head">
+          <h3>Blog Manager</h3>
+          <p>Create, publish, edit, and remove blog articles for the public Blogs page.</p>
+        </div>
+
+        <div class="admin-shell__toolbar">
+          <input
+            class="admin-shell__search"
+            [ngModel]="blogSearch"
+            (ngModelChange)="setBlogSearch($event)"
+            placeholder="Search by title, slug, author, excerpt, or content"
+            type="search"
+          />
+        </div>
+
+        @if (paginatedBlogPosts.length) {
+          <div class="admin-shell__log-list">
+            @for (post of paginatedBlogPosts; track post.id) {
+              <article class="admin-shell__log-card">
+                <div class="admin-shell__log-main">
+                  <div>
+                    <strong>{{ post.title }}</strong>
+                    <p>{{ post.slug }}</p>
+                  </div>
+                  <span class="admin-shell__status" [class.admin-shell__status--soft]="!post.isPublished">
+                    {{ blogStatusLabel(post) }}
+                  </span>
+                </div>
+
+                <div class="admin-shell__log-meta">
+                  <span>{{ post.authorName || 'Editorial Desk' }}</span>
+                  <span>{{ formatDate(post.publishedAt || post.createdAt) }}</span>
+                  <span>{{ post.excerpt || (post.content | slice:0:90) }}</span>
+                </div>
+
+                <div class="admin-shell__icon-actions">
+                  <button type="button" aria-label="View blog post" title="View blog post" (click)="openBlogViewer(post)">
+                    <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                  </button>
+                  <button type="button" aria-label="Edit blog post" title="Edit blog post" (click)="openBlogEditor(post)">
+                    <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+                  </button>
+                  <button type="button" aria-label="Delete blog post" title="Delete blog post" (click)="setPendingDelete({ kind: 'blog', id: post.id })">
+                    <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                  </button>
+                </div>
+
+                @if (isPendingDelete('blog', post.id)) {
+                  <div class="admin-shell__inline-confirm">
+                    <span>{{ deletePromptText('blog', post) }}</span>
+                    <button type="button" (click)="deleteBlog(post)">Delete</button>
+                    <button type="button" (click)="setPendingDelete(null)">Cancel</button>
+                  </div>
+                }
+              </article>
+            }
+          </div>
+        } @else {
+          <p class="admin-shell__empty">No blog posts matched the current search.</p>
+        }
+
+        <app-admin-pagination
+          [currentPage]="pageNumber('blogs')"
+          [pageSize]="8"
+          [totalItems]="filteredBlogPosts.length"
+          (pageChange)="setPageNumber('blogs', $event)"
+        ></app-admin-pagination>
+      </section>
+    }
+
     @if (selectedSection === 'admissions') {
       <section class="admin-shell__card">
         <div class="admin-shell__card-head">
@@ -605,6 +689,7 @@
           <ul class="admin-shell__bullet-list">
             <li>Content document: `siteContent/main`</li>
             <li>Media collection: `mediaLibrary` + Firebase Storage objects</li>
+            <li>Blog posts: `blogPosts`</li>
             <li>Admission logs: `admissionLogs`</li>
             <li>Contact logs: `contactLogs`</li>
           </ul>
@@ -711,6 +796,106 @@
             <a class="admin-shell__action admin-shell__action--accent" [href]="modal.asset.url" rel="noreferrer" target="_blank">Open File</a>
           </div>
         }
+      </section>
+    }
+
+    @if (blogViewModal; as modal) {
+      <section class="admin-modal__panel admin-modal__panel--viewer">
+        <div class="admin-modal__head">
+          <div>
+            <p class="admin-shell__eyebrow">Blog Post</p>
+            <h3>{{ modal.post.title }}</h3>
+            <span>{{ modal.post.authorName || 'TheLearningLabs Editorial Desk' }} • {{ formatDate(modal.post.publishedAt || modal.post.createdAt) }}</span>
+          </div>
+
+          <button type="button" class="admin-shell__action admin-shell__action--light" (click)="closeModal()">Close</button>
+        </div>
+
+        @if (modal.post.coverImageSrc) {
+          <img class="admin-modal__image" [alt]="modal.post.coverImageAlt || modal.post.title" [src]="modal.post.coverImageSrc" />
+        }
+
+        <div class="admin-shell__blog-copy">
+          @if (modal.post.excerpt) {
+            <p class="admin-shell__blog-excerpt">{{ modal.post.excerpt }}</p>
+          }
+          <p>{{ modal.post.content }}</p>
+        </div>
+      </section>
+    }
+
+    @if (blogEditModal && blogEditDraft) {
+      <section class="admin-modal__panel">
+        <div class="admin-modal__head">
+          <div>
+            <p class="admin-shell__eyebrow">Blog Editor</p>
+            <h3>{{ blogEditDraft.id ? 'Edit Blog Post' : 'Create Blog Post' }}</h3>
+            <span>{{ blogEditDraft.id ? 'Update and republish your article from this form.' : 'Create a draft or publish a new article instantly.' }}</span>
+          </div>
+
+          <div class="admin-modal__actions">
+            <button type="button" class="admin-shell__action admin-shell__action--accent" (click)="saveBlogEdit()">
+              {{ isSavingBlog ? 'Saving...' : 'Save Blog' }}
+            </button>
+            <button type="button" class="admin-shell__action admin-shell__action--light" (click)="closeModal()">Cancel</button>
+          </div>
+        </div>
+
+        <form class="admin-shell__form-grid" (ngSubmit)="saveBlogEdit()">
+          <label class="admin-shell__form-grid--wide">
+            <span>Title</span>
+            <input [ngModel]="blogEditDraft.title" (ngModelChange)="updateBlogTitle($event)" name="blogTitle" required type="text" />
+          </label>
+
+          <label>
+            <span>Slug</span>
+            <input [(ngModel)]="blogEditDraft.slug" name="blogSlug" type="text" />
+          </label>
+
+          <label>
+            <span>Author</span>
+            <input [(ngModel)]="blogEditDraft.authorName" name="blogAuthor" type="text" />
+          </label>
+
+          <label class="admin-shell__form-grid--wide admin-shell__blog-toggle">
+            <span>Publishing</span>
+            <div>
+              <input [(ngModel)]="blogEditDraft.isPublished" name="blogPublished" type="checkbox" />
+              <p>{{ blogEditDraft.isPublished ? 'Published' : 'Saved as draft' }}</p>
+            </div>
+          </label>
+
+          <label class="admin-shell__form-grid--wide">
+            <span>Cover Image URL</span>
+            <input [(ngModel)]="blogEditDraft.coverImageSrc" name="blogCoverImageSrc" type="url" />
+            <div class="admin-shell__blog-media-actions">
+              <button class="admin-shell__action admin-shell__action--light" type="button" (click)="chooseBlogCoverFromLibrary()">Library</button>
+              <button class="admin-shell__action admin-shell__action--light" type="button" (click)="uploadBlogCover()">Upload</button>
+              <button class="admin-shell__action admin-shell__action--light" type="button" (click)="replaceBlogCover()">Replace</button>
+            </div>
+          </label>
+
+          @if (blogEditDraft.coverImageSrc) {
+            <div class="admin-shell__form-grid--wide admin-shell__blog-image-preview">
+              <img [alt]="blogEditDraft.coverImageAlt || 'Blog cover preview'" [src]="blogEditDraft.coverImageSrc" />
+            </div>
+          }
+
+          <label class="admin-shell__form-grid--wide">
+            <span>Cover Image Alt</span>
+            <input [(ngModel)]="blogEditDraft.coverImageAlt" name="blogCoverImageAlt" type="text" />
+          </label>
+
+          <label class="admin-shell__form-grid--wide">
+            <span>Excerpt</span>
+            <textarea [(ngModel)]="blogEditDraft.excerpt" name="blogExcerpt" rows="3"></textarea>
+          </label>
+
+          <label class="admin-shell__form-grid--wide">
+            <span>Content</span>
+            <textarea [(ngModel)]="blogEditDraft.content" name="blogContent" required rows="10"></textarea>
+          </label>
+        </form>
       </section>
     }
 

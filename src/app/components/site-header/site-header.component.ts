@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostListener, inject, input, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostListener, computed, inject, input, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 export type HeaderLink = {
@@ -28,13 +28,19 @@ export class SiteHeaderComponent implements AfterViewInit {
   private lastScrollY = 0;
 
   readonly brand = input.required<string>();
-  readonly brandHref = input('/home');
+  readonly brandHref = input('/');
   readonly navItems = input.required<HeaderLink[]>();
   readonly actions = input<HeaderAction[]>([]);
   readonly avatarLabel = input<string | null>(null);
   readonly mobileMenuOpen = signal(false);
   readonly headerHidden = signal(false);
   readonly headerRaised = signal(false);
+  readonly resolvedNavItems = computed(() => {
+    const items = this.navItems();
+    return items.some((item) => item.path === '/blogs')
+      ? items
+      : [...items, { label: 'Blogs', path: '/blogs' }];
+  });
 
   navbarLogoUrl = signal('https://firebasestorage.googleapis.com/v0/b/learnlabclasses.firebasestorage.app/o/Logo%20The%20learning%20Lab.png?alt=media&token=34d53b00-15d5-4237-8d9e-187468e56c66');
 

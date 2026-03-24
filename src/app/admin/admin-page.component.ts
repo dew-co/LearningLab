@@ -4,8 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 
-import type { AdmissionLog, AdmissionStatus, ContactLog, MediaAsset, MediaKind } from '../data-records.model';
+import type { AdmissionLog, AdmissionStatus, BlogPost, BlogPostInput, ContactLog, MediaAsset, MediaKind } from '../data-records.model';
 import { AdmissionLogService } from '../admission-log.service';
+import { BlogService } from '../blog.service';
 import { ContactLogService } from '../contact-log.service';
 import { MediaLibraryService } from '../media-library.service';
 import { SiteContentService } from '../site-content.service';
@@ -16,7 +17,7 @@ import { AdminContentEditorComponent } from './admin-content-editor.component';
 import { AdminMediaDialogService } from './admin-media-dialog.service';
 import { AdminPaginationComponent } from './admin-pagination.component';
 
-type AdminSectionKey = 'dashboard' | 'pages' | 'settings' | 'media' | 'admissions' | 'contacts' | 'management';
+type AdminSectionKey = 'dashboard' | 'pages' | 'settings' | 'media' | 'blogs' | 'admissions' | 'contacts' | 'management';
 
 type AdminSection = {
   key: AdminSectionKey;
@@ -68,20 +69,36 @@ type AdmissionOptionField = {
 
 type DeleteTarget =
   | { kind: 'media'; id: string }
+  | { kind: 'blog'; id: string }
   | { kind: 'admission'; id: string }
   | { kind: 'contact'; id: string }
   | null;
 
-type DeleteKind = 'media' | 'admission' | 'contact';
+type DeleteKind = 'media' | 'blog' | 'admission' | 'contact';
 
 type ModalState =
   | { kind: 'media'; asset: MediaAsset }
+  | { kind: 'blog-view'; post: BlogPost }
+  | { kind: 'blog-edit' }
   | { kind: 'admission-view'; log: AdmissionLog }
   | { kind: 'admission-edit'; log: AdmissionLog }
   | { kind: 'contact'; log: ContactLog }
   | null;
 
-type PaginationKey = 'sidebar' | 'pageTabs' | 'sectionTabs' | 'media' | 'admissions' | 'contacts' | 'mediaPicker';
+type PaginationKey = 'sidebar' | 'pageTabs' | 'sectionTabs' | 'media' | 'blogs' | 'admissions' | 'contacts' | 'mediaPicker';
+
+type BlogEditDraft = {
+  id: string | null;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  coverImageSrc: string;
+  coverImageAlt: string;
+  authorName: string;
+  isPublished: boolean;
+  publishedAt: number;
+};
 
 const ADMIN_SECTIONS: AdminSection[] = [
   {
@@ -109,6 +126,12 @@ const ADMIN_SECTIONS: AdminSection[] = [
     description: 'Upload, replace, preview, and remove shared storage assets.'
   },
   {
+    key: 'blogs',
+    label: 'Blogs',
+    icon: 'fa-regular fa-newspaper',
+    description: 'Create, publish, edit, and delete blog posts for the public Blogs page.'
+  },
+  {
     key: 'admissions',
     label: 'Admission Logs',
     icon: 'fa-solid fa-user-graduate',
@@ -132,7 +155,7 @@ const PAGE_CONFIGS: PageConfig[] = [
   {
     key: 'home',
     label: 'Home',
-    route: '/home',
+    route: '/',
     description: 'Homepage hero, faculty, testimonials, plans, FAQ, and newsletter.',
     sections: [
       { key: 'hero', label: 'Hero' },
@@ -290,6 +313,7 @@ export class AdminPageComponent {
   private readonly contentService = inject(SiteContentService);
   private readonly authService = inject(AdminAuthService);
   private readonly mediaLibraryService = inject(MediaLibraryService);
+  private readonly blogService = inject(BlogService);
   private readonly admissionLogService = inject(AdmissionLogService);
   private readonly contactLogService = inject(ContactLogService);
   private readonly mediaDialogService = inject(AdminMediaDialogService);
@@ -300,6 +324,7 @@ export class AdminPageComponent {
   readonly adminSession = this.authService.session;
   readonly contentLoading = this.contentService.isLoading;
   readonly mediaLoading = this.mediaLibraryService.isLoading;
+  readonly blogsLoading = this.blogService.isLoading;
   readonly admissionsLoading = this.admissionLogService.isLoading;
   readonly contactsLoading = this.contactLogService.isLoading;
   readonly mediaDialog = this.mediaDialogService.request;
@@ -317,6 +342,7 @@ export class AdminPageComponent {
 
   mediaFilter: MediaKind | 'all' = 'all';
   mediaSearch = '';
+  blogSearch = '';
   mediaPickerSearch = '';
   admissionSearch = '';
   contactSearch = '';
@@ -326,8 +352,10 @@ export class AdminPageComponent {
   activeModal: ModalState = null;
   isSavingContent = false;
   isUploadingMedia = false;
+  isSavingBlog = false;
   isSavingAdmission = false;
 
+  blogEditDraft: BlogEditDraft | null = null;
   admissionEditDraft: AdmissionLog | null = null;
   newAdmissionOptionDraft: Record<AdmissionOptionFieldKey, string> = {
     currentClassOptions: '',
@@ -340,6 +368,7 @@ export class AdminPageComponent {
     pageTabs: 1,
     sectionTabs: 1,
     media: 1,
+    blogs: 1,
     admissions: 1,
     contacts: 1,
     mediaPicker: 1
@@ -566,6 +595,140 @@ export class AdminPageComponent {
     this.activeModal = { kind: 'media', asset };
   }
 
+  openBlogViewer(post: BlogPost): void {
+    this.activeModal = { kind: 'blog-view', post };
+  }
+
+  openBlogCreator(): void {
+    this.blogEditDraft = this.createBlogDraft();
+    this.activeModal = { kind: 'blog-edit' };
+  }
+
+  openBlogEditor(post: BlogPost): void {
+    this.blogEditDraft = this.createBlogDraft(post);
+    this.activeModal = { kind: 'blog-edit' };
+  }
+
+  async saveBlogEdit(): Promise<void> {
+    if (!this.blogEditDraft) {
+      return;
+    }
+
+    const title = this.blogEditDraft.title.trim();
+    const content = this.blogEditDraft.content.trim();
+
+    if (!title || !content) {
+      this.toastService.error('Title and content are required.');
+      return;
+    }
+
+    this.isSavingBlog = true;
+
+    try {
+      const payload: BlogPostInput = {
+        title,
+        slug: this.slugify(this.blogEditDraft.slug || title),
+        excerpt: this.blogEditDraft.excerpt.trim(),
+        content,
+        coverImageSrc: this.blogEditDraft.coverImageSrc.trim(),
+        coverImageAlt: this.blogEditDraft.coverImageAlt.trim(),
+        authorName: this.blogEditDraft.authorName.trim() || 'TheLearningLabs Editorial Desk',
+        isPublished: this.blogEditDraft.isPublished,
+        publishedAt: this.blogEditDraft.isPublished
+          ? this.blogEditDraft.publishedAt || Date.now()
+          : 0
+      };
+
+      if (this.blogEditDraft.id) {
+        await this.blogService.updatePost(this.blogEditDraft.id, payload);
+        this.toastService.success('Blog post updated.');
+      } else {
+        await this.blogService.createPost(payload);
+        this.toastService.success('Blog post created.');
+      }
+
+      this.closeModal();
+    } catch {
+      this.toastService.error('Blog post could not be saved.');
+    } finally {
+      this.isSavingBlog = false;
+    }
+  }
+
+  async deleteBlog(post: BlogPost): Promise<void> {
+    try {
+      await this.blogService.deletePost(post.id);
+      this.pendingDelete = null;
+      this.toastService.info('Blog post deleted.');
+    } catch {
+      this.toastService.error('Blog post could not be deleted.');
+    }
+  }
+
+  async chooseBlogCoverFromLibrary(): Promise<void> {
+    if (!this.blogEditDraft) {
+      return;
+    }
+
+    const asset = await this.mediaDialogService.open({
+      title: 'Select Blog Cover',
+      description: 'Choose a cover image from Media Libraries.',
+      allowedKinds: ['image'],
+      currentUrl: this.blogEditDraft.coverImageSrc
+    });
+
+    if (!asset) {
+      return;
+    }
+
+    this.blogEditDraft.coverImageSrc = asset.url;
+  }
+
+  async uploadBlogCover(): Promise<void> {
+    if (!this.blogEditDraft) {
+      return;
+    }
+
+    const files = await this.pickFiles('image/*');
+
+    if (!files.length) {
+      return;
+    }
+
+    try {
+      const asset = await this.mediaLibraryService.uploadFile(files[0]);
+      this.blogEditDraft.coverImageSrc = asset.url;
+      this.toastService.success('Cover image uploaded to Media Libraries.');
+    } catch {
+      this.toastService.error('Cover image upload failed.');
+    }
+  }
+
+  async replaceBlogCover(): Promise<void> {
+    await this.uploadBlogCover();
+  }
+
+  updateBlogTitle(value: string): void {
+    if (!this.blogEditDraft) {
+      return;
+    }
+
+    const previousTitleSlug = this.slugify(this.blogEditDraft.title);
+    const currentSlug = this.slugify(this.blogEditDraft.slug);
+    const shouldAutoUpdateSlug = !currentSlug || currentSlug === previousTitleSlug;
+
+    this.blogEditDraft.title = value;
+
+    if (shouldAutoUpdateSlug) {
+      this.blogEditDraft.slug = this.slugify(value);
+    }
+  }
+
+  setBlogSearch(value: string): void {
+    this.blogSearch = value;
+    this.setPageNumber('blogs', 1);
+  }
+
   openAdmissionViewer(log: AdmissionLog): void {
     this.activeModal = { kind: 'admission-view', log };
   }
@@ -581,6 +744,7 @@ export class AdminPageComponent {
 
   closeModal(): void {
     this.activeModal = null;
+    this.blogEditDraft = null;
     this.admissionEditDraft = null;
   }
 
@@ -767,6 +931,25 @@ export class AdminPageComponent {
     return this.paginate(this.filteredMediaAssets, 'media', 8);
   }
 
+  get filteredBlogPosts(): BlogPost[] {
+    const searchValue = this.blogSearch.trim().toLowerCase();
+
+    return this.blogService.posts().filter((post) => {
+      if (!searchValue) {
+        return true;
+      }
+
+      return [post.title, post.slug, post.excerpt, post.content, post.authorName]
+        .join(' ')
+        .toLowerCase()
+        .includes(searchValue);
+    });
+  }
+
+  get paginatedBlogPosts(): BlogPost[] {
+    return this.paginate(this.filteredBlogPosts, 'blogs', 8);
+  }
+
   get filteredAdmissionLogs(): AdmissionLog[] {
     const searchValue = this.admissionSearch.trim().toLowerCase();
 
@@ -862,6 +1045,14 @@ export class AdminPageComponent {
     return this.activeModal?.kind === 'media' ? this.activeModal : null;
   }
 
+  get blogViewModal(): Extract<NonNullable<ModalState>, { kind: 'blog-view' }> | null {
+    return this.activeModal?.kind === 'blog-view' ? this.activeModal : null;
+  }
+
+  get blogEditModal(): Extract<NonNullable<ModalState>, { kind: 'blog-edit' }> | null {
+    return this.activeModal?.kind === 'blog-edit' ? this.activeModal : null;
+  }
+
   get admissionViewModal(): Extract<NonNullable<ModalState>, { kind: 'admission-view' }> | null {
     return this.activeModal?.kind === 'admission-view' ? this.activeModal : null;
   }
@@ -884,6 +1075,10 @@ export class AdminPageComponent {
 
   get mediaCount(): number {
     return this.mediaLibraryService.assets().length;
+  }
+
+  get blogCount(): number {
+    return this.blogService.posts().length;
   }
 
   get admissionCount(): number {
@@ -957,13 +1152,17 @@ export class AdminPageComponent {
     return this.contentService.countMediaReferences(asset.url);
   }
 
-  deletePromptText(kind: DeleteKind, assetOrLog: MediaAsset | AdmissionLog | ContactLog): string {
+  deletePromptText(kind: DeleteKind, assetOrLog: MediaAsset | BlogPost | AdmissionLog | ContactLog): string {
     if (kind === 'media') {
       const asset = assetOrLog as MediaAsset;
       const referenceCount = this.mediaReferenceCount(asset);
       return referenceCount > 0
         ? `Delete this asset? ${referenceCount} content reference${referenceCount > 1 ? 's still point to it.' : ' still points to it.'}`
         : 'Delete this asset from Firebase Storage and Media Libraries?';
+    }
+
+    if (kind === 'blog') {
+      return 'Delete this blog post?';
     }
 
     if (kind === 'admission') {
@@ -1010,6 +1209,37 @@ export class AdminPageComponent {
 
   statusLabel(status: AdmissionStatus): string {
     return status.replace(/-/g, ' ').replace(/^\w/, (value) => value.toUpperCase());
+  }
+
+  blogStatusLabel(post: BlogPost): string {
+    return post.isPublished ? 'Published' : 'Draft';
+  }
+
+  private slugify(value: string): string {
+    const slug = value
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+
+    return slug || 'untitled-post';
+  }
+
+  private createBlogDraft(post?: BlogPost): BlogEditDraft {
+    return {
+      id: post?.id ?? null,
+      title: post?.title ?? '',
+      slug: post?.slug ?? '',
+      excerpt: post?.excerpt ?? '',
+      content: post?.content ?? '',
+      coverImageSrc: post?.coverImageSrc ?? '',
+      coverImageAlt: post?.coverImageAlt ?? '',
+      authorName: post?.authorName ?? 'TheLearningLabs Editorial Desk',
+      isPublished: post?.isPublished ?? false,
+      publishedAt: post?.publishedAt ?? 0
+    };
   }
 
   private paginate<T>(items: T[], key: PaginationKey, pageSize: number): T[] {

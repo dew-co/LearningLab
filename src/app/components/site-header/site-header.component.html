@@ -25,7 +25,7 @@
 
     <div class="site-header__menu" id="site-header-menu" [class.site-header__menu--open]="mobileMenuOpen()">
       <nav class="site-header__nav">
-        @for (item of navItems(); track item.label) {
+        @for (item of resolvedNavItems(); track item.label) {
           @if (item.type === 'href') {
             <a class="site-header__link" [href]="item.path" (click)="closeMobileMenu()">{{ item.label }}</a>
           } @else {

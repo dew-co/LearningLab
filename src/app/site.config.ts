@@ -8,8 +8,9 @@ import type {
 export const SITE_BRAND_NAME = 'TheLearningLabs';
 
 export const SITE_NAV_ITEMS: HeaderLink[] = [
-  { label: 'Home', path: '/home', exact: true },
+  { label: 'Home', path: '/', exact: true },
   { label: 'Courses', path: '/courses' },
+  { label: 'Blogs', path: '/blogs' },
   { label: 'Live Classes', path: '/live-classes' },
   { label: 'Results', path: '/results' },
   { label: 'About Us', path: '/about-us' },
@@ -25,6 +26,7 @@ export const SITE_FOOTER_DESCRIPTION =
 
 export const SITE_FOOTER_QUICK_LINKS: FooterLink[] = [
   { label: 'Courses', path: '/courses' },
+  { label: 'Blogs', path: '/blogs' },
   { label: 'Live Classes', path: '/live-classes' },
   { label: 'Results', path: '/results' },
   { label: 'Admission', path: '/admission' }

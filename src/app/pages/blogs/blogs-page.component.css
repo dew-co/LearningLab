@@ -1,0 +1,245 @@
+:host {
+  display: block;
+}
+
+.blogs-page {
+  background: #f8f7f5;
+}
+
+.blogs-page__hero,
+.blogs-page__section,
+.blogs-page__cta {
+  padding-inline: 10rem;
+}
+
+.blogs-page__hero {
+  padding-block: 5rem;
+  background: linear-gradient(180deg, #ffffff, #fef5ea);
+}
+
+.blogs-page__section {
+  padding-block: 4rem;
+}
+
+.blogs-page__cta {
+  padding-block: 4.2rem 5rem;
+  background: rgba(244, 140, 37, 0.08);
+}
+
+.blogs-page__hero-shell,
+.blogs-page__section > .section-shell,
+.blogs-page__cta-shell {
+  width: min(100%, 62rem);
+}
+
+.blogs-page__hero-shell {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.blogs-page__eyebrow {
+  margin: 0;
+  width: fit-content;
+  border-radius: 999px;
+  background: rgba(244, 140, 37, 0.12);
+  color: #de7614;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 0.35rem 0.85rem;
+  text-transform: uppercase;
+}
+
+.blogs-page__hero-shell h1 {
+  margin: 0;
+  color: #161210;
+  font-size: clamp(2.5rem, 4.5vw, 3.4rem);
+  font-weight: 900;
+  line-height: 1.03;
+  letter-spacing: -0.03em;
+}
+
+.blogs-page__hero-shell > p:last-child {
+  margin: 0;
+  max-width: 42rem;
+  color: rgba(22, 18, 16, 0.75);
+  font-size: 1.1rem;
+  font-weight: 500;
+  line-height: 1.65;
+}
+
+.blogs-page__grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.blogs-page__card {
+  display: grid;
+  gap: 0.8rem;
+  border: 1px solid rgba(18, 14, 12, 0.08);
+  border-radius: 1.15rem;
+  background: #fff;
+  padding: 0.9rem;
+  box-shadow: 0 16px 30px rgba(18, 14, 12, 0.06);
+}
+
+.blogs-page__media {
+  overflow: hidden;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(18, 14, 12, 0.08);
+  background: linear-gradient(135deg, #ffeede, #f6fafc);
+  aspect-ratio: 16 / 9;
+}
+
+.blogs-page__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.blogs-page__media-empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  gap: 0.5rem;
+  padding: 1rem;
+  color: rgba(26, 20, 16, 0.6);
+  text-align: center;
+}
+
+.blogs-page__media-empty i {
+  font-size: 1.7rem;
+}
+
+.blogs-page__media-empty span {
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.blogs-page__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.8rem;
+}
+
+.blogs-page__meta span {
+  margin: 0;
+  border-radius: 999px;
+  background: rgba(244, 140, 37, 0.1);
+  color: #b96716;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.28rem 0.62rem;
+}
+
+.blogs-page__card h2 {
+  margin: 0;
+  color: #191411;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.28;
+}
+
+.blogs-page__card > p {
+  margin: 0;
+  color: #5f5853;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.blogs-page__details {
+  border-top: 1px dashed rgba(24, 19, 15, 0.16);
+  padding-top: 0.65rem;
+}
+
+.blogs-page__details summary {
+  cursor: pointer;
+  color: #d06c10;
+  font-weight: 700;
+}
+
+.blogs-page__details p {
+  margin: 0.7rem 0 0;
+  color: #524c47;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  white-space: pre-line;
+}
+
+.blogs-page__empty {
+  margin: 0;
+  border: 1px dashed rgba(23, 19, 14, 0.18);
+  border-radius: 0.95rem;
+  background: rgba(255, 255, 255, 0.72);
+  color: #625b55;
+  padding: 1.1rem;
+  text-align: center;
+}
+
+.blogs-page__cta-shell {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: center;
+  text-align: center;
+}
+
+.blogs-page__cta-shell h2 {
+  margin: 0;
+  color: #161210;
+  font-size: clamp(1.9rem, 3vw, 2.35rem);
+  font-weight: 900;
+  line-height: 1.12;
+}
+
+.blogs-page__cta-shell p {
+  margin: 0;
+  max-width: 44rem;
+  color: rgba(22, 18, 16, 0.7);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.blogs-page__cta-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.4rem;
+  border-radius: 0.78rem;
+  background: #f48c25;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 800;
+  padding: 0.85rem 1.55rem;
+  box-shadow: 0 14px 30px rgba(244, 140, 37, 0.2);
+}
+
+@media (max-width: 1024px) {
+  .blogs-page__hero,
+  .blogs-page__section,
+  .blogs-page__cta {
+    padding-inline: 4rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .blogs-page__hero,
+  .blogs-page__section,
+  .blogs-page__cta {
+    padding-inline: 1rem;
+  }
+
+  .blogs-page__hero {
+    padding-block: 3.8rem;
+  }
+
+  .blogs-page__section {
+    padding-block: 3.2rem;
+  }
+
+  .blogs-page__grid {
+    grid-template-columns: 1fr;
+  }
+}
