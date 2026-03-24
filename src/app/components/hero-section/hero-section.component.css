@@ -5,7 +5,7 @@
 .hero-section {
   overflow: hidden;
   position: relative;
-  padding: 4.2rem 3rem 10rem;
+  padding: 4.2rem 3rem 0rem;
   background:
     radial-gradient(circle at right top, rgba(244, 140, 37, 0.05) 0%, rgba(244, 140, 37, 0) 42%),
     radial-gradient(circle at left bottom, rgba(244, 140, 37, 0.1) 0%, rgba(244, 140, 37, 0) 40%),
@@ -195,7 +195,7 @@
 
 @media (max-width: 767px) {
   .hero-section {
-    padding: 2rem 0.75rem 4.5rem;
+    padding: 2rem 0.75rem 0rem;
   }
 
   .hero-title {
