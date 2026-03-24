@@ -14,4 +14,27 @@ export class MentorsSectionComponent {
   readonly titleAccent = input.required<string>();
   readonly description = input.required<string>();
   readonly faculty = input.required<FacultyMember[]>();
+  private readonly failedMemberImages = new Set<string>();
+
+  hasMemberImage(member: FacultyMember): boolean {
+    return Boolean(member.imageSrc?.trim()) && !this.failedMemberImages.has(member.name);
+  }
+
+  markMemberImageBroken(memberName: string): void {
+    this.failedMemberImages.add(memberName);
+  }
+
+  initials(name: string): string {
+    const value = name.trim();
+
+    if (!value) {
+      return 'FC';
+    }
+
+    return value
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? '')
+      .join('');
+  }
 }

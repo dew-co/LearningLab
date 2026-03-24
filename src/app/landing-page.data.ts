@@ -28,6 +28,8 @@ export type FacultyMember = {
   title: string;
   credential: string;
   experience: string;
+  imageSrc: string;
+  imageAlt: string;
 };
 
 export type Testimonial = {
@@ -120,25 +122,33 @@ export const landingPageContent: LandingPageContent = {
       name: 'Dr. Arjun Sharma',
       title: 'Senior Physics Faculty',
       credential: 'IIT Delhi Alumnus',
-      experience: '15+ Years Experience'
+      experience: '15+ Years Experience',
+      imageSrc: 'design/mentor-a.jpg',
+      imageAlt: 'Dr. Arjun Sharma portrait'
     },
     {
       name: 'Prof. Sarah Khan',
       title: 'Mathematics Expert',
       credential: 'IISc Bangalore Alumna',
-      experience: '12+ Years Experience'
+      experience: '12+ Years Experience',
+      imageSrc: 'design/mentor-b.jpg',
+      imageAlt: 'Prof. Sarah Khan portrait'
     },
     {
       name: 'Dr. Rajesh Iyer',
       title: 'Chemistry Head',
       credential: 'IIT Bombay Alumnus',
-      experience: '20+ Years Experience'
+      experience: '20+ Years Experience',
+      imageSrc: 'design/mentor-c.jpg',
+      imageAlt: 'Dr. Rajesh Iyer portrait'
     },
     {
       name: 'Ms. Meera Reddy',
       title: 'Senior Biology Faculty',
       credential: 'AIIMS Delhi Alumna',
-      experience: '10+ Years Experience'
+      experience: '10+ Years Experience',
+      imageSrc: 'design/mentor-d.jpg',
+      imageAlt: 'Ms. Meera Reddy portrait'
     }
   ],
   testimonials: [

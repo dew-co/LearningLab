@@ -61,11 +61,20 @@ export class AdminContentEditorComponent {
       return [];
     }
 
-    return Object.entries(value).map(([key, entryValue]) => ({
-      key,
-      value: entryValue,
-      prototype: this.isRecord(prototype) ? prototype[key] : undefined
-    }));
+    const valueKeys = Object.keys(value);
+    const prototypeKeys = this.isRecord(prototype) ? Object.keys(prototype) : [];
+    const mergedKeys = [...valueKeys, ...prototypeKeys.filter((key) => !valueKeys.includes(key))];
+
+    return mergedKeys.map((key) => {
+      const prototypeValue = this.isRecord(prototype) ? prototype[key] : undefined;
+      const hasOwnValue = Object.prototype.hasOwnProperty.call(value, key);
+
+      return {
+        key,
+        value: hasOwnValue ? value[key] : this.createEmptyValue(prototypeValue),
+        prototype: prototypeValue
+      };
+    });
   }
 
   humanize(value: string): string {

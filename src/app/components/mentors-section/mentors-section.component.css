@@ -51,8 +51,27 @@
 }
 
 .faculty-card__placeholder {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
   min-height: 21.1rem;
-  background: #f3f4f6;
+  background: linear-gradient(135deg, #eef2f7, #f7f8fa);
+}
+
+.faculty-card__image {
+  width: 100%;
+  height: 100%;
+  min-height: 21.1rem;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.faculty-card__initials {
+  color: #8f98a4;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
 }
 
 .faculty-card__body {
@@ -148,6 +167,10 @@
   }
 
   .faculty-card__placeholder {
+    min-height: 10.5rem;
+  }
+
+  .faculty-card__image {
     min-height: 10.5rem;
   }
 }

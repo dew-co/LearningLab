@@ -11,7 +11,18 @@
     <div class="faculty-section__grid">
       @for (member of faculty(); track member.name; let index = $index) {
         <article class="faculty-card" [attr.data-delay]="index * 0.08" data-reveal="fade-up">
-          <div class="faculty-card__placeholder" aria-hidden="true"></div>
+          <div class="faculty-card__placeholder">
+            @if (hasMemberImage(member)) {
+              <img
+                class="faculty-card__image"
+                [alt]="member.imageAlt || (member.name + ' portrait')"
+                [src]="member.imageSrc"
+                (error)="markMemberImageBroken(member.name)"
+              />
+            } @else {
+              <span class="faculty-card__initials" aria-hidden="true">{{ initials(member.name) }}</span>
+            }
+          </div>
 
           <div class="faculty-card__body">
             <h3>{{ member.name }}</h3>
