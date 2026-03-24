@@ -146,6 +146,8 @@
 }
 
 .admin-editor__image-preview {
+  display: grid;
+  gap: 0.5rem;
   overflow: hidden;
   border: 1px solid rgba(29, 24, 20, 0.08);
   border-radius: 0.85rem;
@@ -153,11 +155,84 @@
   padding: 0.6rem;
 }
 
+.admin-editor__image-button {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  border-radius: 0.65rem;
+  overflow: hidden;
+  cursor: zoom-in;
+  background: rgba(255, 255, 255, 0.9);
+}
+
 .admin-editor__image-preview img {
   width: 100%;
-  max-height: 13rem;
-  object-fit: cover;
+  max-height: min(42vh, 20rem);
+  object-fit: contain;
+  object-position: center;
   border-radius: 0.65rem;
+}
+
+.admin-editor__image-fallback {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.admin-editor__image-fallback p,
+.admin-editor__image-empty {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #70645d;
+}
+
+.admin-editor__viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.admin-editor__viewer-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(19, 15, 11, 0.74);
+}
+
+.admin-editor__viewer-panel {
+  position: relative;
+  z-index: 1;
+  width: min(95vw, 62rem);
+  max-height: 92vh;
+  overflow: auto;
+  display: grid;
+  gap: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 1rem;
+  background: #fefaf2;
+  padding: 0.9rem;
+}
+
+.admin-editor__viewer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.admin-editor__viewer-head strong {
+  font-size: 0.94rem;
+  color: #1e1813;
+}
+
+.admin-editor__viewer-image {
+  width: 100%;
+  max-height: calc(90vh - 9rem);
+  object-fit: contain;
+  border: 1px solid rgba(29, 24, 20, 0.08);
+  border-radius: 0.8rem;
+  background: #f5f1ea;
 }
 
 .admin-editor__empty {
@@ -168,4 +243,15 @@
   color: #70645d;
   font-size: 0.9rem;
   text-align: center;
+}
+
+@media (max-width: 42rem) {
+  .admin-editor__viewer-panel {
+    width: 100%;
+    max-height: 95vh;
+  }
+
+  .admin-editor__viewer-image {
+    max-height: 68vh;
+  }
 }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, inject, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
 
@@ -35,6 +35,10 @@ export class AdminContentEditorComponent {
   readonly parent = input<unknown | null>(null);
   readonly keyOrIndex = input<string | number | null>(null);
   readonly depth = input(0);
+
+  previewImageUrl: string | null = null;
+  previewImageLabel = '';
+  private readonly failedImageUrls = new Set<string>();
 
   isRecord(value: unknown): value is EditableRecord {
     return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -130,6 +134,60 @@ export class AdminContentEditorComponent {
       /(document|file|brochure|pdf|attachment|banner)/.test(normalizedKey) ||
       /\.(pdf|doc|docx|ppt|pptx|xls|xlsx|txt)(\?.*)?$/i.test(value)
     );
+  }
+
+  imageUrl(value: unknown): string {
+    if (typeof value !== 'string') {
+      return '';
+    }
+
+    return value.trim();
+  }
+
+  isImagePreviewBroken(url: string): boolean {
+    return this.failedImageUrls.has(url);
+  }
+
+  markImagePreviewBroken(url: string): void {
+    if (!url) {
+      return;
+    }
+
+    this.failedImageUrls.add(url);
+  }
+
+  markImagePreviewLoaded(url: string): void {
+    if (!url) {
+      return;
+    }
+
+    this.failedImageUrls.delete(url);
+  }
+
+  openImagePreview(url: unknown, label: string): void {
+    const normalizedUrl = this.imageUrl(url);
+
+    if (!normalizedUrl) {
+      this.toastService.error('Image URL is empty.');
+      return;
+    }
+
+    this.previewImageUrl = normalizedUrl;
+    this.previewImageLabel = label;
+  }
+
+  closeImagePreview(): void {
+    this.previewImageUrl = null;
+    this.previewImageLabel = '';
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (!this.previewImageUrl) {
+      return;
+    }
+
+    this.closeImagePreview();
   }
 
   mediaKindsForField(rawKey: string, value: unknown): MediaKind[] {

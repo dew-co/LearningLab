@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import type { PricingPlan } from '../../landing-page.data';
 
 @Component({
   selector: 'app-programs-section',
   standalone: true,
+  imports: [RouterLink],
   templateUrl: './programs-section.component.html',
   styleUrl: './programs-section.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush

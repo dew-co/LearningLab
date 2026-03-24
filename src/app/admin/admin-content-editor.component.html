@@ -144,9 +144,38 @@
       }
 
       @if (isImageField(nodeRawKey, node)) {
-        <div class="admin-editor__image-preview">
-          <img [alt]="nodeLabel + ' preview'" [src]="node || ''" />
-        </div>
+        @if (imageUrl(node); as nodeImageUrl) {
+          <div class="admin-editor__image-preview">
+            @if (isImagePreviewBroken(nodeImageUrl)) {
+              <div class="admin-editor__image-fallback">
+                <p>Preview unavailable for this URL.</p>
+                <a class="admin-editor__media-link" [href]="nodeImageUrl" rel="noreferrer" target="_blank">
+                  Open source
+                </a>
+              </div>
+            } @else {
+              <button
+                type="button"
+                class="admin-editor__image-button"
+                [attr.aria-label]="'Open full preview for ' + nodeLabel"
+                (click)="openImagePreview(nodeImageUrl, nodeLabel)"
+              >
+                <img
+                  [alt]="nodeLabel + ' preview'"
+                  [src]="nodeImageUrl"
+                  (error)="markImagePreviewBroken(nodeImageUrl)"
+                  (load)="markImagePreviewLoaded(nodeImageUrl)"
+                />
+              </button>
+            }
+
+            <button type="button" class="admin-editor__media-link" (click)="openImagePreview(nodeImageUrl, nodeLabel)">
+              Full view
+            </button>
+          </div>
+        } @else {
+          <p class="admin-editor__image-empty">No image selected yet.</p>
+        }
       } @else if (isMediaField(nodeRawKey, node) && node) {
         <a class="admin-editor__media-link" [href]="node || ''" rel="noreferrer" target="_blank">
           Open linked file
@@ -155,3 +184,22 @@
     </label>
   }
 </ng-template>
+
+@if (previewImageUrl) {
+  <div class="admin-editor__viewer" (click)="closeImagePreview()">
+    <div class="admin-editor__viewer-backdrop"></div>
+
+    <section class="admin-editor__viewer-panel" (click)="$event.stopPropagation()">
+      <div class="admin-editor__viewer-head">
+        <strong>{{ previewImageLabel || 'Image Preview' }}</strong>
+        <button type="button" class="admin-editor__media-link" (click)="closeImagePreview()">Close</button>
+      </div>
+
+      <img class="admin-editor__viewer-image" [alt]="(previewImageLabel || 'Image') + ' full preview'" [src]="previewImageUrl" />
+
+      <a class="admin-editor__media-link" [href]="previewImageUrl" rel="noreferrer" target="_blank">
+        Open in new tab
+      </a>
+    </section>
+  </div>
+}

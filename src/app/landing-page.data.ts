@@ -45,6 +45,7 @@ export type PricingPlan = {
   featured?: boolean;
   features: string[];
   ctaLabel: string;
+  ctaHref: string;
 };
 
 export type FaqItem = {
@@ -169,7 +170,8 @@ export const landingPageContent: LandingPageContent = {
       price: '₹2,999',
       billing: '/month',
       features: ['Daily Live Classes', 'Core Study Materials', 'Weekly Mock Tests'],
-      ctaLabel: 'Join Now'
+      ctaLabel: 'Join Now',
+      ctaHref: '/admission'
     },
     {
       name: 'Premium',
@@ -178,14 +180,16 @@ export const landingPageContent: LandingPageContent = {
       badge: 'Most Popular',
       featured: true,
       features: ['Everything in Basic', '24/7 Priority Doubt Support', 'Personalized Mentorship', 'Recorded Session Library'],
-      ctaLabel: 'Start Your Free Trial'
+      ctaLabel: 'Join Now',
+      ctaHref: '/admission'
     },
     {
       name: 'Elite',
       price: '₹7,999',
       billing: '/month',
       features: ['Everything in Premium', '1-on-1 Session Weekly', 'Physical Study Material Kits'],
-      ctaLabel: 'Join Now'
+      ctaLabel: 'Join Now',
+      ctaHref: '/admission'
     }
   ],
   faqs: [
