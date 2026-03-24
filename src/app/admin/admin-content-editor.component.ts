@@ -85,6 +85,50 @@ export class AdminContentEditorComponent {
       .replace(/^\w/, (character) => character.toUpperCase());
   }
 
+  fieldIconClass(rawKey: string, value: unknown): string {
+    if (this.isImageField(rawKey, value)) {
+      return 'fa-regular fa-image';
+    }
+
+    if (this.isMediaField(rawKey, value)) {
+      return 'fa-regular fa-file-lines';
+    }
+
+    if (this.isBoolean(value)) {
+      return 'fa-solid fa-toggle-on';
+    }
+
+    if (this.isNumber(value)) {
+      return 'fa-solid fa-hashtag';
+    }
+
+    if (this.usesTextarea(rawKey, value)) {
+      return 'fa-regular fa-pen-to-square';
+    }
+
+    if (/(title|heading|label|name)/i.test(rawKey)) {
+      return 'fa-solid fa-heading';
+    }
+
+    if (/(phone|mobile)/i.test(rawKey)) {
+      return 'fa-solid fa-phone';
+    }
+
+    if (/(email)/i.test(rawKey)) {
+      return 'fa-regular fa-envelope';
+    }
+
+    if (/(address|location|city|state)/i.test(rawKey)) {
+      return 'fa-solid fa-location-dot';
+    }
+
+    return 'fa-solid fa-keyboard';
+  }
+
+  isWideField(rawKey: string, value: unknown): boolean {
+    return this.isMediaField(rawKey, value) || this.usesTextarea(rawKey, value);
+  }
+
   summarizeItem(value: unknown, index: number): string {
     if (typeof value === 'string') {
       return value.trim() || `Item ${index + 1}`;

@@ -25,7 +25,10 @@
     <section class="admin-editor__group" [class.admin-editor__group--root]="nodeDepth === 0">
       @if (nodeDepth > 0) {
         <div class="admin-editor__group-head">
-          <h4>{{ nodeLabel }}</h4>
+          <div class="admin-editor__group-title">
+            <span class="admin-editor__icon"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></span>
+            <h4>{{ nodeLabel }}</h4>
+          </div>
         </div>
       }
 
@@ -47,10 +50,20 @@
       </div>
     </section>
   } @else if (isArray(node)) {
-    <section class="admin-editor__group">
+    <section class="admin-editor__group admin-editor__group--wide">
       <div class="admin-editor__group-head">
-        <h4>{{ nodeLabel }}</h4>
-        <button type="button" (click)="addArrayItem(node, nodePrototype)">Add Item</button>
+        <div class="admin-editor__group-title">
+          <span class="admin-editor__icon"><i class="fa-solid fa-list-ul" aria-hidden="true"></i></span>
+          <div>
+            <h4>{{ nodeLabel }}</h4>
+            <small>{{ node.length }} item{{ node.length === 1 ? '' : 's' }}</small>
+          </div>
+        </div>
+
+        <button type="button" (click)="addArrayItem(node, nodePrototype)">
+          <i class="fa-solid fa-plus" aria-hidden="true"></i>
+          <span>Add Item</span>
+        </button>
       </div>
 
       @if (node.length === 0) {
@@ -60,8 +73,15 @@
           @for (item of node; track $index) {
             <article class="admin-editor__array-card">
               <div class="admin-editor__array-head">
-                <strong>{{ summarizeItem(item, $index) }}</strong>
-                <button type="button" (click)="removeArrayItem(node, $index)">Remove</button>
+                <div>
+                  <strong>{{ summarizeItem(item, $index) }}</strong>
+                  <small>Item {{ $index + 1 }}</small>
+                </div>
+
+                <button type="button" (click)="removeArrayItem(node, $index)">
+                  <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                  <span>Remove</span>
+                </button>
               </div>
 
               <ng-container
@@ -82,65 +102,61 @@
       }
     </section>
   } @else if (isBoolean(node)) {
-    <label class="admin-editor__field admin-editor__field--toggle">
-      <span>{{ nodeLabel }}</span>
-      <input
-        type="checkbox"
-        [ngModel]="node"
-        (ngModelChange)="updatePrimitive(nodeParent, nodeKey, $event)"
-      />
-    </label>
+    <div class="admin-editor__field admin-editor__field--wide admin-editor__field--toggle-card">
+      <div class="admin-editor__field-copy">
+        <span class="admin-editor__field-label">
+          <i [class]="fieldIconClass(nodeRawKey, node)" aria-hidden="true"></i>
+          {{ nodeLabel }}
+        </span>
+        <small>{{ node ? 'Enabled' : 'Disabled' }}</small>
+      </div>
+
+      <button
+        type="button"
+        class="admin-editor__switch"
+        [class.admin-editor__switch--active]="node"
+        [attr.aria-pressed]="node"
+        (click)="updatePrimitive(nodeParent, nodeKey, !node)"
+      >
+        <span></span>
+      </button>
+    </div>
   } @else if (isNumber(node)) {
     <label class="admin-editor__field">
-      <span>{{ nodeLabel }}</span>
-      <input
-        type="number"
-        [ngModel]="node"
-        (ngModelChange)="updatePrimitive(nodeParent, nodeKey, $event)"
-      />
+      <span class="admin-editor__field-label">
+        <i [class]="fieldIconClass(nodeRawKey, node)" aria-hidden="true"></i>
+        {{ nodeLabel }}
+      </span>
+      <input type="number" [ngModel]="node" (ngModelChange)="updatePrimitive(nodeParent, nodeKey, $event)" />
     </label>
   } @else {
-    <label class="admin-editor__field">
-      <span>{{ nodeLabel }}</span>
+    <label class="admin-editor__field" [class.admin-editor__field--wide]="isWideField(nodeRawKey, node)">
+      <span class="admin-editor__field-label">
+        <i [class]="fieldIconClass(nodeRawKey, node)" aria-hidden="true"></i>
+        {{ nodeLabel }}
+      </span>
+
       @if (isMediaField(nodeRawKey, node)) {
-        <input
-          [type]="inputType(nodeRawKey)"
-          [ngModel]="node ?? ''"
-          (ngModelChange)="updatePrimitive(nodeParent, nodeKey, $event)"
-        />
+        <input [type]="inputType(nodeRawKey)" [ngModel]="node ?? ''" (ngModelChange)="updatePrimitive(nodeParent, nodeKey, $event)" />
 
         <div class="admin-editor__media-actions">
-          <button
-            type="button"
-            (click)="chooseMediaFromLibrary(nodeParent, nodeKey, nodeRawKey, nodeLabel, node)"
-          >
-            Library
+          <button type="button" (click)="chooseMediaFromLibrary(nodeParent, nodeKey, nodeRawKey, nodeLabel, node)">
+            <i class="fa-regular fa-folder-open" aria-hidden="true"></i>
+            <span>Library</span>
           </button>
-          <button
-            type="button"
-            (click)="uploadMediaForField(nodeParent, nodeKey, nodeRawKey, node)"
-          >
-            Upload
+          <button type="button" (click)="uploadMediaForField(nodeParent, nodeKey, nodeRawKey, node)">
+            <i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>
+            <span>Upload</span>
           </button>
-          <button
-            type="button"
-            (click)="replaceMediaForField(nodeParent, nodeKey, nodeRawKey, node)"
-          >
-            Replace
+          <button type="button" (click)="replaceMediaForField(nodeParent, nodeKey, nodeRawKey, node)">
+            <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+            <span>Replace</span>
           </button>
         </div>
       } @else if (usesTextarea(nodeRawKey, node)) {
-        <textarea
-          rows="4"
-          [ngModel]="node ?? ''"
-          (ngModelChange)="updatePrimitive(nodeParent, nodeKey, $event)"
-        ></textarea>
+        <textarea rows="4" [ngModel]="node ?? ''" (ngModelChange)="updatePrimitive(nodeParent, nodeKey, $event)"></textarea>
       } @else {
-        <input
-          [type]="inputType(nodeRawKey)"
-          [ngModel]="node ?? ''"
-          (ngModelChange)="updatePrimitive(nodeParent, nodeKey, $event)"
-        />
+        <input [type]="inputType(nodeRawKey)" [ngModel]="node ?? ''" (ngModelChange)="updatePrimitive(nodeParent, nodeKey, $event)" />
       }
 
       @if (isImageField(nodeRawKey, node)) {
@@ -150,7 +166,8 @@
               <div class="admin-editor__image-fallback">
                 <p>Preview unavailable for this URL.</p>
                 <a class="admin-editor__media-link" [href]="nodeImageUrl" rel="noreferrer" target="_blank">
-                  Open source
+                  <i class="fa-solid fa-up-right-from-square" aria-hidden="true"></i>
+                  <span>Open source</span>
                 </a>
               </div>
             } @else {
@@ -170,7 +187,8 @@
             }
 
             <button type="button" class="admin-editor__media-link" (click)="openImagePreview(nodeImageUrl, nodeLabel)">
-              Full view
+              <i class="fa-solid fa-expand" aria-hidden="true"></i>
+              <span>Full view</span>
             </button>
           </div>
         } @else {
@@ -178,7 +196,8 @@
         }
       } @else if (isMediaField(nodeRawKey, node) && node) {
         <a class="admin-editor__media-link" [href]="node || ''" rel="noreferrer" target="_blank">
-          Open linked file
+          <i class="fa-solid fa-up-right-from-square" aria-hidden="true"></i>
+          <span>Open linked file</span>
         </a>
       }
     </label>
@@ -192,13 +211,17 @@
     <section class="admin-editor__viewer-panel" (click)="$event.stopPropagation()">
       <div class="admin-editor__viewer-head">
         <strong>{{ previewImageLabel || 'Image Preview' }}</strong>
-        <button type="button" class="admin-editor__media-link" (click)="closeImagePreview()">Close</button>
+        <button type="button" class="admin-editor__media-link" (click)="closeImagePreview()">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+          <span>Close</span>
+        </button>
       </div>
 
       <img class="admin-editor__viewer-image" [alt]="(previewImageLabel || 'Image') + ' full preview'" [src]="previewImageUrl" />
 
       <a class="admin-editor__media-link" [href]="previewImageUrl" rel="noreferrer" target="_blank">
-        Open in new tab
+        <i class="fa-solid fa-up-right-from-square" aria-hidden="true"></i>
+        <span>Open in new tab</span>
       </a>
     </section>
   </div>

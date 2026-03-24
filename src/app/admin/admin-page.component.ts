@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, effect, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, effect, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
@@ -67,6 +67,12 @@ type AdmissionOptionField = {
   description: string;
 };
 
+type SectionInsight = {
+  icon: string;
+  label: string;
+  value: string;
+};
+
 type DeleteTarget =
   | { kind: 'media'; id: string }
   | { kind: 'blog'; id: string }
@@ -111,7 +117,7 @@ const ADMIN_SECTIONS: AdminSection[] = [
     key: 'pages',
     label: 'Website Content',
     icon: 'fa-solid fa-layer-group',
-    description: 'Edit every public page section with Firebase-backed content.'
+    description: 'Edit every public page section from one place.'
   },
   {
     key: 'settings',
@@ -298,6 +304,9 @@ const ADMISSION_OPTION_FIELDS: AdmissionOptionField[] = [
   }
 ];
 
+const ADMIN_SIDEBAR_STORAGE_KEY = 'learninglabs-admin-sidebar-collapsed';
+const ADMIN_DESKTOP_BREAKPOINT = 1180;
+
 @Component({
   selector: 'app-admin-page',
   standalone: true,
@@ -331,6 +340,8 @@ export class AdminPageComponent {
   readonly admissionStatuses = ADMISSION_STATUSES;
   readonly mediaFilters: Array<MediaKind | 'all'> = ['all', 'image', 'document', 'other'];
   readonly admissionOptionFields = ADMISSION_OPTION_FIELDS;
+  readonly brandLogoUrl =
+    'https://firebasestorage.googleapis.com/v0/b/learnlabclasses.firebasestorage.app/o/Logo%20The%20learning%20Lab.png?alt=media&token=34d53b00-15d5-4237-8d9e-187468e56c66';
 
   readonly defaultContent = this.contentService.getDefaultContent();
 
@@ -339,6 +350,9 @@ export class AdminPageComponent {
   selectedWebsiteTab: WebsiteContentTabKey = 'home';
   selectedSectionKey = 'hero';
   importPayload = '';
+  sidebarCollapsed = false;
+  mobileMenuOpen = false;
+  isDesktopLayout = true;
 
   mediaFilter: MediaKind | 'all' = 'all';
   mediaSearch = '';
@@ -375,6 +389,9 @@ export class AdminPageComponent {
   };
 
   constructor() {
+    this.sidebarCollapsed = this.readSidebarPreference();
+    this.syncViewportState();
+
     effect(() => {
       this.contentService.content();
       this.draft = this.contentService.getSnapshot();
@@ -382,9 +399,18 @@ export class AdminPageComponent {
     });
   }
 
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.syncViewportState();
+  }
+
   setSection(sectionKey: AdminSectionKey): void {
     this.selectedSection = sectionKey;
     this.pendingDelete = null;
+
+    if (!this.isDesktopLayout) {
+      this.mobileMenuOpen = false;
+    }
   }
 
   setSelectedPage(pageKey: PageKey): void {
@@ -411,6 +437,32 @@ export class AdminPageComponent {
     this.paginationState[key] = page;
   }
 
+  toggleMenu(): void {
+    if (this.isDesktopLayout) {
+      this.toggleSidebarCollapse();
+      return;
+    }
+
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  toggleSidebarCollapse(): void {
+    if (!this.isDesktopLayout) {
+      return;
+    }
+
+    this.sidebarCollapsed = !this.sidebarCollapsed;
+    this.persistSidebarPreference();
+  }
+
+  closeMobileMenu(): void {
+    if (this.isDesktopLayout) {
+      return;
+    }
+
+    this.mobileMenuOpen = false;
+  }
+
   pageNumber(key: PaginationKey): number {
     return this.paginationState[key];
   }
@@ -420,7 +472,7 @@ export class AdminPageComponent {
 
     try {
       await this.contentService.saveContent(this.draft);
-      this.toastService.success('Website content saved to Firebase.');
+      this.toastService.success('Website content saved.');
     } catch {
       this.toastService.error('Website content could not be saved.');
     } finally {
@@ -436,7 +488,7 @@ export class AdminPageComponent {
   async resetSiteContent(): Promise<void> {
     try {
       this.draft = await this.contentService.resetContent();
-      this.toastService.info('Site content was restored to the seeded Firebase defaults.');
+      this.toastService.info('Site content was restored to the default dataset.');
     } catch {
       this.toastService.error('Site content could not be reset.');
     }
@@ -565,7 +617,7 @@ export class AdminPageComponent {
     try {
       await this.mediaLibraryService.deleteAsset(asset);
       this.pendingDelete = null;
-      this.toastService.info('Media item deleted from Firebase Storage and Media Libraries.');
+      this.toastService.info('Media item deleted from the library.');
     } catch {
       this.toastService.error('Media item could not be deleted.');
     }
@@ -859,6 +911,71 @@ export class AdminPageComponent {
     return this.sections.find((section) => section.key === this.selectedSection) ?? this.sections[0];
   }
 
+  get isSidebarCompact(): boolean {
+    return this.isDesktopLayout && this.sidebarCollapsed;
+  }
+
+  get sectionInsights(): SectionInsight[] {
+    switch (this.selectedSection) {
+      case 'dashboard':
+        return [
+          { icon: 'fa-solid fa-globe', label: 'Managed pages', value: `${this.pageCount}` },
+          { icon: 'fa-solid fa-layer-group', label: 'Sections', value: `${this.sectionCount}` },
+          { icon: 'fa-regular fa-images', label: 'Image refs', value: `${this.imageCount}` },
+          { icon: 'fa-regular fa-pen-to-square', label: 'Text fields', value: `${this.textFieldCount}` }
+        ];
+      case 'pages':
+        return [
+          { icon: 'fa-regular fa-window-maximize', label: 'Active page', value: this.activePage.label },
+          { icon: 'fa-solid fa-list', label: 'Sections', value: `${this.activePage.sections.length}` },
+          { icon: 'fa-regular fa-pen-to-square', label: 'Editing', value: this.selectedSectionLabel },
+          { icon: 'fa-solid fa-up-right-from-square', label: 'Preview route', value: this.activePage.route }
+        ];
+      case 'settings':
+        return [
+          { icon: 'fa-solid fa-sliders', label: 'Workspace', value: 'Site settings' },
+          { icon: 'fa-solid fa-font', label: 'Text fields', value: `${this.textFieldCount}` },
+          { icon: 'fa-regular fa-images', label: 'Image refs', value: `${this.imageCount}` },
+          { icon: 'fa-solid fa-pen-ruler', label: 'Draft', value: 'Working copy' }
+        ];
+      case 'media':
+        return [
+          { icon: 'fa-solid fa-photo-film', label: 'Assets', value: `${this.mediaCount}` },
+          { icon: 'fa-solid fa-filter', label: 'Filter', value: this.mediaFilter },
+          { icon: 'fa-solid fa-magnifying-glass', label: 'Results', value: `${this.filteredMediaAssets.length}` },
+          { icon: 'fa-solid fa-cloud-arrow-up', label: 'Upload', value: this.isUploadingMedia ? 'In progress' : 'Ready' }
+        ];
+      case 'blogs':
+        return [
+          { icon: 'fa-regular fa-newspaper', label: 'Posts', value: `${this.blogCount}` },
+          { icon: 'fa-solid fa-bullhorn', label: 'Published', value: `${this.publishedBlogCount}` },
+          { icon: 'fa-regular fa-file', label: 'Drafts', value: `${this.draftBlogCount}` },
+          { icon: 'fa-solid fa-magnifying-glass', label: 'Results', value: `${this.filteredBlogPosts.length}` }
+        ];
+      case 'admissions':
+        return [
+          { icon: 'fa-solid fa-user-graduate', label: 'Logs', value: `${this.admissionCount}` },
+          { icon: 'fa-solid fa-inbox', label: 'New', value: `${this.admissionCountByStatus('new')}` },
+          { icon: 'fa-solid fa-phone-volume', label: 'Contacted', value: `${this.admissionCountByStatus('contacted')}` },
+          { icon: 'fa-solid fa-magnifying-glass', label: 'Results', value: `${this.filteredAdmissionLogs.length}` }
+        ];
+      case 'contacts':
+        return [
+          { icon: 'fa-solid fa-address-book', label: 'Logs', value: `${this.contactCount}` },
+          { icon: 'fa-solid fa-bolt', label: 'Latest lead', value: this.recentContacts[0]?.studentName ?? 'No leads yet' },
+          { icon: 'fa-solid fa-magnifying-glass', label: 'Results', value: `${this.filteredContactLogs.length}` },
+          { icon: 'fa-solid fa-clock', label: 'Sync', value: 'Live' }
+        ];
+      case 'management':
+        return [
+          { icon: 'fa-solid fa-file-export', label: 'Export', value: 'JSON backup' },
+          { icon: 'fa-solid fa-file-import', label: 'Import', value: 'File or paste' },
+          { icon: 'fa-solid fa-rotate-left', label: 'Reset', value: 'Seeded defaults' },
+          { icon: 'fa-solid fa-database', label: 'Collections', value: '4 live datasets' }
+        ];
+    }
+  }
+
   get selectedSectionLabel(): string {
     return this.activePage.sections.find((section) => section.key === this.selectedSectionKey)?.label ?? this.selectedSectionKey;
   }
@@ -1081,6 +1198,14 @@ export class AdminPageComponent {
     return this.blogService.posts().length;
   }
 
+  get publishedBlogCount(): number {
+    return this.blogService.posts().filter((post) => post.isPublished).length;
+  }
+
+  get draftBlogCount(): number {
+    return this.blogService.posts().filter((post) => !post.isPublished).length;
+  }
+
   get admissionCount(): number {
     return this.admissionLogService.logs().length;
   }
@@ -1158,7 +1283,7 @@ export class AdminPageComponent {
       const referenceCount = this.mediaReferenceCount(asset);
       return referenceCount > 0
         ? `Delete this asset? ${referenceCount} content reference${referenceCount > 1 ? 's still point to it.' : ' still points to it.'}`
-        : 'Delete this asset from Firebase Storage and Media Libraries?';
+        : 'Delete this asset from the media library?';
     }
 
     if (kind === 'blog') {
@@ -1326,5 +1451,41 @@ export class AdminPageComponent {
 
       input.click();
     });
+  }
+
+  private admissionCountByStatus(status: AdmissionStatus): number {
+    return this.admissionLogService.logs().filter((log) => log.status === status).length;
+  }
+
+  private readSidebarPreference(): boolean {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    return window.localStorage.getItem(ADMIN_SIDEBAR_STORAGE_KEY) === 'true';
+  }
+
+  private persistSidebarPreference(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.localStorage.setItem(ADMIN_SIDEBAR_STORAGE_KEY, String(this.sidebarCollapsed));
+  }
+
+  private syncViewportState(): void {
+    if (typeof window === 'undefined') {
+      this.isDesktopLayout = true;
+      this.mobileMenuOpen = false;
+      return;
+    }
+
+    this.isDesktopLayout = window.innerWidth > ADMIN_DESKTOP_BREAKPOINT;
+
+    if (this.isDesktopLayout) {
+      this.mobileMenuOpen = false;
+    }
+
+    this.cdr.markForCheck();
   }
 }

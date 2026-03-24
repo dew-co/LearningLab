@@ -1,135 +1,226 @@
-<main class="admin-shell">
+<main
+  class="admin-shell"
+  [class.admin-shell--sidebar-collapsed]="isSidebarCompact"
+  [class.admin-shell--sidebar-open]="mobileMenuOpen"
+>
+  @if (mobileMenuOpen && !isDesktopLayout) {
+    <button
+      type="button"
+      class="admin-shell__mobile-backdrop"
+      aria-label="Close navigation"
+      (click)="closeMobileMenu()"
+    ></button>
+  }
+
   <aside class="admin-shell__sidebar">
-    <div class="admin-shell__brand">
-      <p>Firebase Admin</p>
-      <h1>{{ draft.site.brandName }}</h1>
-      <span>Realtime website content, media storage, and enquiry logs.</span>
-    </div>
-
-    <div class="admin-shell__profile-card">
-      <span>{{ adminSession()?.avatarLabel }}</span>
-      <div>
-        <strong>{{ adminSession()?.fullName }}</strong>
-        <p>{{ adminSession()?.email }}</p>
+    <div class="admin-shell__brand-card">
+      <div class="admin-shell__brand-mark" aria-hidden="true">
+        <img [src]="brandLogoUrl" alt="" />
       </div>
+
+      @if (!isSidebarCompact) {
+        <div class="admin-shell__brand-copy">
+          <h1>{{ draft.site.brandName }}</h1>
+        </div>
+      }
     </div>
 
-    <nav class="admin-shell__nav">
-      @for (section of paginatedSections; track section.key) {
+    <button
+      type="button"
+      class="admin-shell__rail-toggle"
+      [attr.aria-label]="isSidebarCompact ? 'Expand sidebar' : 'Collapse sidebar'"
+      [attr.title]="isSidebarCompact ? 'Expand sidebar' : 'Collapse sidebar'"
+      (click)="toggleSidebarCollapse()"
+    >
+      <i [class]="isSidebarCompact ? 'fa-solid fa-angles-right' : 'fa-solid fa-angles-left'" aria-hidden="true"></i>
+    </button>
+
+    <nav class="admin-shell__nav" aria-label="Admin sections">
+      @for (section of sections; track section.key) {
         <button
           type="button"
+          class="admin-shell__nav-button"
           [class.admin-shell__nav-button--active]="selectedSection === section.key"
+          [attr.aria-current]="selectedSection === section.key ? 'page' : null"
+          [attr.title]="isSidebarCompact ? section.label : null"
           (click)="setSection(section.key)"
         >
-          <span><i [class]="section.icon" aria-hidden="true"></i>{{ section.label }}</span>
-          <small>{{ section.description }}</small>
+          <span class="admin-shell__nav-icon"><i [class]="section.icon" aria-hidden="true"></i></span>
+
+          <span class="admin-shell__nav-meta">
+            <span class="admin-shell__nav-label">{{ section.label }}</span>
+          </span>
         </button>
       }
     </nav>
-
-    <app-admin-pagination
-      [currentPage]="pageNumber('sidebar')"
-      [pageSize]="5"
-      [totalItems]="sections.length"
-      (pageChange)="setPageNumber('sidebar', $event)"
-    ></app-admin-pagination>
-
-    <div class="admin-shell__sidebar-note">
-      <strong>Storage model</strong>
-      <p>Auth, content, logs, and media now run through Firebase Auth, Firestore, and Firebase Storage.</p>
-    </div>
   </aside>
 
   <section class="admin-shell__main">
     <header class="admin-shell__topbar">
-      <div>
-        <p class="admin-shell__eyebrow">{{ currentSectionMeta.label }}</p>
-        <h2>{{ currentSectionMeta.description }}</h2>
+      <div class="admin-shell__topbar-main">
+        <div class="admin-shell__topbar-controls">
+          @if (!isDesktopLayout) {
+            <button
+              type="button"
+              class="admin-shell__icon-button admin-shell__icon-button--light admin-shell__menu-button"
+              [attr.aria-label]="mobileMenuOpen ? 'Close menu' : 'Open menu'"
+              (click)="toggleMenu()"
+            >
+              <i [class]="mobileMenuOpen ? 'fa-solid fa-xmark' : 'fa-solid fa-bars'" aria-hidden="true"></i>
+            </button>
+          }
+
+          <div class="admin-shell__section-icon" aria-hidden="true">
+            <i [class]="currentSectionMeta.icon"></i>
+          </div>
+        </div>
+
+        <div class="admin-shell__topbar-copy">
+          <p class="admin-shell__eyebrow">{{ currentSectionMeta.label }}</p>
+          <h2>{{ currentSectionMeta.description }}</h2>
+        </div>
       </div>
 
       <div class="admin-shell__topbar-actions">
         @if (selectedSection === 'pages' || selectedSection === 'settings') {
           <button class="admin-shell__action admin-shell__action--light" type="button" (click)="discardChanges()">
-            Discard Draft
+            <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+            <span>Discard Draft</span>
           </button>
           <button class="admin-shell__action admin-shell__action--accent" type="button" (click)="saveContent()">
-            {{ isSavingContent ? 'Saving...' : 'Save Changes' }}
+            <i class="fa-regular fa-floppy-disk" aria-hidden="true"></i>
+            <span>{{ isSavingContent ? 'Saving...' : 'Save Changes' }}</span>
           </button>
         }
 
         @if (selectedSection === 'media') {
           <button class="admin-shell__action admin-shell__action--accent" type="button" (click)="uploadNewMedia()">
-            {{ isUploadingMedia ? 'Uploading...' : 'Upload Media' }}
+            <i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>
+            <span>{{ isUploadingMedia ? 'Uploading...' : 'Upload Media' }}</span>
           </button>
         }
 
         @if (selectedSection === 'blogs') {
           <button class="admin-shell__action admin-shell__action--accent" type="button" (click)="openBlogCreator()">
-            New Blog
+            <i class="fa-solid fa-plus" aria-hidden="true"></i>
+            <span>New Blog</span>
           </button>
         }
 
-        <button class="admin-shell__action admin-shell__action--dark" type="button" (click)="logout()">Logout</button>
+        <button class="admin-shell__action admin-shell__action--dark" type="button" (click)="logout()">
+          <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+          <span>Logout</span>
+        </button>
       </div>
     </header>
+
+    <section class="admin-shell__section-strip">
+      @for (insight of sectionInsights; track insight.label) {
+        <article class="admin-shell__section-stat">
+          <span class="admin-shell__section-stat-icon"><i [class]="insight.icon" aria-hidden="true"></i></span>
+          <div>
+            <small>{{ insight.label }}</small>
+            <strong>{{ insight.value }}</strong>
+          </div>
+        </article>
+      }
+    </section>
 
     @if (selectedSection === 'dashboard') {
       <section class="admin-shell__dashboard-grid">
         <article class="admin-shell__metric">
-          <p>Pages</p>
+          <div class="admin-shell__metric-head">
+            <span class="admin-shell__metric-icon"><i class="fa-solid fa-globe" aria-hidden="true"></i></span>
+            <p>Pages</p>
+          </div>
           <strong>{{ pageCount }}</strong>
-          <span>Public website destinations managed from Firebase content.</span>
+          <span>Public website destinations managed from this panel.</span>
         </article>
 
         <article class="admin-shell__metric">
-          <p>Sections</p>
+          <div class="admin-shell__metric-head">
+            <span class="admin-shell__metric-icon"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></span>
+            <p>Sections</p>
+          </div>
           <strong>{{ sectionCount }}</strong>
           <span>Editable page sections available in the admin editor.</span>
         </article>
 
         <article class="admin-shell__metric">
-          <p>Media Assets</p>
+          <div class="admin-shell__metric-head">
+            <span class="admin-shell__metric-icon"><i class="fa-solid fa-photo-film" aria-hidden="true"></i></span>
+            <p>Media Assets</p>
+          </div>
           <strong>{{ mediaCount }}</strong>
           <span>Shared images and documents stored in Media Libraries.</span>
         </article>
 
         <article class="admin-shell__metric">
-          <p>Blog Posts</p>
+          <div class="admin-shell__metric-head">
+            <span class="admin-shell__metric-icon"><i class="fa-regular fa-newspaper" aria-hidden="true"></i></span>
+            <p>Blog Posts</p>
+          </div>
           <strong>{{ blogCount }}</strong>
           <span>Draft and published posts powering the Blogs page.</span>
         </article>
 
         <article class="admin-shell__metric">
-          <p>Admission Logs</p>
+          <div class="admin-shell__metric-head">
+            <span class="admin-shell__metric-icon"><i class="fa-solid fa-user-graduate" aria-hidden="true"></i></span>
+            <p>Admission Logs</p>
+          </div>
           <strong>{{ admissionCount }}</strong>
           <span>Admission enquiries collected from the public site.</span>
         </article>
 
         <article class="admin-shell__metric">
-          <p>Contact Logs</p>
+          <div class="admin-shell__metric-head">
+            <span class="admin-shell__metric-icon"><i class="fa-solid fa-address-book" aria-hidden="true"></i></span>
+            <p>Contact Logs</p>
+          </div>
           <strong>{{ contactCount }}</strong>
           <span>Contact enquiries submitted through the website form.</span>
         </article>
 
         <article class="admin-shell__metric">
-          <p>Image Fields</p>
+          <div class="admin-shell__metric-head">
+            <span class="admin-shell__metric-icon"><i class="fa-regular fa-images" aria-hidden="true"></i></span>
+            <p>Image Fields</p>
+          </div>
           <strong>{{ imageCount }}</strong>
           <span>Editable content fields currently pointing at media assets.</span>
+        </article>
+
+        <article class="admin-shell__metric">
+          <div class="admin-shell__metric-head">
+            <span class="admin-shell__metric-icon"><i class="fa-solid fa-font" aria-hidden="true"></i></span>
+            <p>Text Fields</p>
+          </div>
+          <strong>{{ textFieldCount }}</strong>
+          <span>Text-driven content fields available across page and settings data.</span>
         </article>
       </section>
 
       <section class="admin-shell__content-grid">
-        <article class="admin-shell__card">
+        <article class="admin-shell__card admin-shell__card--wide">
           <div class="admin-shell__card-head">
-            <h3>Quick Navigation</h3>
-            <p>Jump directly into a page editor or public route preview.</p>
+            <div class="admin-shell__card-title">
+              <span class="admin-shell__card-icon"><i class="fa-solid fa-compass" aria-hidden="true"></i></span>
+              <div>
+                <h3>Quick Navigation</h3>
+                <p>Jump directly into a page editor or open a live route preview.</p>
+              </div>
+            </div>
           </div>
 
           <div class="admin-shell__quick-links">
             @for (page of pageConfigs; track page.key) {
               <button type="button" class="admin-shell__quick-link" (click)="setSection('pages'); setSelectedPage(page.key)">
-                <strong>{{ page.label }}</strong>
-                <span>{{ page.description }}</span>
+                <div>
+                  <strong>{{ page.label }}</strong>
+                  <span>{{ page.description }}</span>
+                </div>
+                <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
               </button>
             }
           </div>
@@ -137,16 +228,24 @@
 
         <article class="admin-shell__card">
           <div class="admin-shell__card-head">
-            <h3>Recent Admissions</h3>
-            <p>Newest form submissions coming in from the admission page.</p>
+            <div class="admin-shell__card-title">
+              <span class="admin-shell__card-icon"><i class="fa-solid fa-user-graduate" aria-hidden="true"></i></span>
+              <div>
+                <h3>Recent Admissions</h3>
+                <p>Newest submissions coming in from the admission page.</p>
+              </div>
+            </div>
           </div>
 
           @if (recentAdmissions.length) {
             <div class="admin-shell__stack-list">
               @for (log of recentAdmissions; track log.id) {
                 <button type="button" class="admin-shell__stack-item" (click)="openAdmissionViewer(log)">
-                  <strong>{{ log.fullName }}</strong>
-                  <span>{{ log.desiredCourse }} • {{ formatDate(log.createdAt) }}</span>
+                  <i class="fa-regular fa-address-card" aria-hidden="true"></i>
+                  <div>
+                    <strong>{{ log.fullName }}</strong>
+                    <span>{{ log.desiredCourse }} • {{ formatDate(log.createdAt) }}</span>
+                  </div>
                 </button>
               }
             </div>
@@ -157,16 +256,24 @@
 
         <article class="admin-shell__card">
           <div class="admin-shell__card-head">
-            <h3>Recent Contact Leads</h3>
-            <p>Latest enquiries received from the contact form.</p>
+            <div class="admin-shell__card-title">
+              <span class="admin-shell__card-icon"><i class="fa-solid fa-headset" aria-hidden="true"></i></span>
+              <div>
+                <h3>Recent Contact Leads</h3>
+                <p>Latest enquiries received from the contact form.</p>
+              </div>
+            </div>
           </div>
 
           @if (recentContacts.length) {
             <div class="admin-shell__stack-list">
               @for (log of recentContacts; track log.id) {
                 <button type="button" class="admin-shell__stack-item" (click)="openContactViewer(log)">
-                  <strong>{{ log.studentName }}</strong>
-                  <span>{{ log.goal }} • {{ formatDate(log.createdAt) }}</span>
+                  <i class="fa-regular fa-message" aria-hidden="true"></i>
+                  <div>
+                    <strong>{{ log.studentName }}</strong>
+                    <span>{{ log.goal }} • {{ formatDate(log.createdAt) }}</span>
+                  </div>
                 </button>
               }
             </div>
@@ -177,16 +284,24 @@
 
         <article class="admin-shell__card">
           <div class="admin-shell__card-head">
-            <h3>Latest Media Uploads</h3>
-            <p>Most recently updated items in Media Libraries.</p>
+            <div class="admin-shell__card-title">
+              <span class="admin-shell__card-icon"><i class="fa-regular fa-images" aria-hidden="true"></i></span>
+              <div>
+                <h3>Latest Media Uploads</h3>
+                <p>Most recently updated items in Media Libraries.</p>
+              </div>
+            </div>
           </div>
 
           @if (recentMedia.length) {
             <div class="admin-shell__stack-list">
               @for (asset of recentMedia; track asset.id) {
                 <button type="button" class="admin-shell__stack-item" (click)="openMediaViewer(asset)">
-                  <strong>{{ asset.name }}</strong>
-                  <span>{{ asset.kind }} • {{ formatDate(asset.updatedAt) }}</span>
+                  <i class="fa-solid fa-paperclip" aria-hidden="true"></i>
+                  <div>
+                    <strong>{{ asset.name }}</strong>
+                    <span>{{ asset.kind }} • {{ formatDate(asset.updatedAt) }}</span>
+                  </div>
                 </button>
               }
             </div>
@@ -200,28 +315,32 @@
     @if (selectedSection === 'pages') {
       <section class="admin-shell__card">
         <div class="admin-shell__card-head">
-          <h3>Website Content</h3>
-          <p>All website content is stored in Firestore and managed section-by-section from this editor.</p>
-        </div>
+          <div class="admin-shell__card-title">
+            <span class="admin-shell__card-icon"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></span>
+              <div>
+                <h3>Website Content</h3>
+                <p>Manage every public page section from one place.</p>
+              </div>
+            </div>
+          </div>
 
         <div class="admin-shell__tab-row">
-          @for (tab of paginatedWebsiteTabs; track tab.key) {
+          @for (tab of websiteContentTabs; track tab.key) {
             <button
               type="button"
+              class="admin-shell__tab-button"
               [class.admin-shell__tab-button--active]="selectedWebsiteTab === tab.key"
               (click)="setSelectedWebsiteTab(tab.key)"
             >
-              {{ tab.label }}
+              <span>{{ tab.label }}</span>
+              @if (tab.route) {
+                <i class="fa-solid fa-link" aria-hidden="true"></i>
+              } @else {
+                <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+              }
             </button>
           }
         </div>
-
-        <app-admin-pagination
-          [currentPage]="pageNumber('pageTabs')"
-          [pageSize]="4"
-          [totalItems]="websiteContentTabs.length"
-          (pageChange)="setPageNumber('pageTabs', $event)"
-        ></app-admin-pagination>
 
         @if (!isOtherContentTabSelected) {
           <div class="admin-shell__page-meta">
@@ -229,13 +348,18 @@
               <strong>{{ activePage.label }}</strong>
               <p>{{ activePage.description }}</p>
             </div>
-            <a [href]="activePage.route" target="_blank" rel="noreferrer">Preview Page</a>
+
+            <a [href]="activePage.route" target="_blank" rel="noreferrer">
+              <i class="fa-solid fa-up-right-from-square" aria-hidden="true"></i>
+              <span>Preview Page</span>
+            </a>
           </div>
 
           <div class="admin-shell__tab-row admin-shell__tab-row--sub">
-            @for (section of paginatedContentSections; track section.key) {
+            @for (section of activePage.sections; track section.key) {
               <button
                 type="button"
+                class="admin-shell__tab-button admin-shell__tab-button--sub"
                 [class.admin-shell__tab-button--active]="selectedSectionKey === section.key"
                 (click)="setSelectedContentSection(section.key)"
               >
@@ -243,13 +367,6 @@
               </button>
             }
           </div>
-
-          <app-admin-pagination
-            [currentPage]="pageNumber('sectionTabs')"
-            [pageSize]="6"
-            [totalItems]="activePage.sections.length"
-            (pageChange)="setPageNumber('sectionTabs', $event)"
-          ></app-admin-pagination>
 
           <div class="admin-shell__editor-wrap">
             <app-admin-content-editor
@@ -311,7 +428,10 @@
                     placeholder="Add new option"
                     type="text"
                   />
-                  <button type="button" (click)="addAdmissionOption(field.key)">Add</button>
+                  <button type="button" (click)="addAdmissionOption(field.key)">
+                    <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                    <span>Add</span>
+                  </button>
                 </div>
               </article>
             }
@@ -323,8 +443,13 @@
     @if (selectedSection === 'settings') {
       <section class="admin-shell__card">
         <div class="admin-shell__card-head">
-          <h3>Site Settings</h3>
-          <p>Brand identity, navigation, footer links, contact details, and other site-wide settings.</p>
+          <div class="admin-shell__card-title">
+            <span class="admin-shell__card-icon"><i class="fa-solid fa-sliders" aria-hidden="true"></i></span>
+            <div>
+              <h3>Site Settings</h3>
+              <p>Brand identity, navigation, footer links, and global contact details in one editor.</p>
+            </div>
+          </div>
         </div>
 
         <div class="admin-shell__editor-wrap">
@@ -344,18 +469,26 @@
     @if (selectedSection === 'media') {
       <section class="admin-shell__card">
         <div class="admin-shell__card-head">
-          <h3>Media Libraries</h3>
-          <p>All uploads are stored in Firebase Storage and can be reused across every content section.</p>
+          <div class="admin-shell__card-title">
+            <span class="admin-shell__card-icon"><i class="fa-solid fa-photo-film" aria-hidden="true"></i></span>
+            <div>
+              <h3>Media Libraries</h3>
+              <p>Upload, preview, replace, and remove shared assets used across the website.</p>
+            </div>
+          </div>
         </div>
 
         <div class="admin-shell__toolbar">
-          <input
-            class="admin-shell__search"
-            [ngModel]="mediaSearch"
-            (ngModelChange)="setMediaSearch($event)"
-            placeholder="Search media by file name or type"
-            type="search"
-          />
+          <div class="admin-shell__search-field">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+            <input
+              class="admin-shell__search"
+              [ngModel]="mediaSearch"
+              (ngModelChange)="setMediaSearch($event)"
+              placeholder="Search media by file name or type"
+              type="search"
+            />
+          </div>
 
           <div class="admin-shell__filter-row">
             @for (kind of mediaFilters; track kind) {
@@ -389,8 +522,11 @@
                 </div>
 
                 <div class="admin-shell__record-copy">
-                  <strong>{{ asset.name }}</strong>
-                  <p>{{ asset.kind }} • {{ formatFileSize(asset.size) }} • {{ formatDate(asset.updatedAt) }}</p>
+                  <div class="admin-shell__record-topline">
+                    <strong>{{ asset.name }}</strong>
+                    <span class="admin-shell__status admin-shell__status--soft">{{ asset.kind }}</span>
+                  </div>
+                  <p>{{ formatFileSize(asset.size) }} • {{ formatDate(asset.updatedAt) }}</p>
                   <small>{{ mediaReferenceCount(asset) }} content reference{{ mediaReferenceCount(asset) === 1 ? '' : 's' }}</small>
                 </div>
 
@@ -432,18 +568,26 @@
     @if (selectedSection === 'blogs') {
       <section class="admin-shell__card">
         <div class="admin-shell__card-head">
-          <h3>Blog Manager</h3>
-          <p>Create, publish, edit, and remove blog articles for the public Blogs page.</p>
+          <div class="admin-shell__card-title">
+            <span class="admin-shell__card-icon"><i class="fa-regular fa-newspaper" aria-hidden="true"></i></span>
+            <div>
+              <h3>Blog Manager</h3>
+              <p>Create, publish, edit, and remove articles that power the public Blogs page.</p>
+            </div>
+          </div>
         </div>
 
         <div class="admin-shell__toolbar">
-          <input
-            class="admin-shell__search"
-            [ngModel]="blogSearch"
-            (ngModelChange)="setBlogSearch($event)"
-            placeholder="Search by title, slug, author, excerpt, or content"
-            type="search"
-          />
+          <div class="admin-shell__search-field">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+            <input
+              class="admin-shell__search"
+              [ngModel]="blogSearch"
+              (ngModelChange)="setBlogSearch($event)"
+              placeholder="Search by title, slug, author, excerpt, or content"
+              type="search"
+            />
+          </div>
         </div>
 
         @if (paginatedBlogPosts.length) {
@@ -461,9 +605,9 @@
                 </div>
 
                 <div class="admin-shell__log-meta">
-                  <span>{{ post.authorName || 'Editorial Desk' }}</span>
-                  <span>{{ formatDate(post.publishedAt || post.createdAt) }}</span>
-                  <span>{{ post.excerpt || (post.content | slice:0:90) }}</span>
+                  <span><i class="fa-regular fa-user" aria-hidden="true"></i>{{ post.authorName || 'Editorial Desk' }}</span>
+                  <span><i class="fa-regular fa-calendar" aria-hidden="true"></i>{{ formatDate(post.publishedAt || post.createdAt) }}</span>
+                  <span><i class="fa-regular fa-note-sticky" aria-hidden="true"></i>{{ post.excerpt || (post.content | slice:0:90) }}</span>
                 </div>
 
                 <div class="admin-shell__icon-actions">
@@ -504,18 +648,26 @@
     @if (selectedSection === 'admissions') {
       <section class="admin-shell__card">
         <div class="admin-shell__card-head">
-          <h3>Admission Logs</h3>
-          <p>All admission form submissions are stored in Firestore and editable from this panel.</p>
-        </div>
+          <div class="admin-shell__card-title">
+            <span class="admin-shell__card-icon"><i class="fa-solid fa-user-graduate" aria-hidden="true"></i></span>
+              <div>
+                <h3>Admission Logs</h3>
+                <p>Review, update, and remove admission form submissions.</p>
+              </div>
+            </div>
+          </div>
 
         <div class="admin-shell__toolbar">
-          <input
-            class="admin-shell__search"
-            [ngModel]="admissionSearch"
-            (ngModelChange)="setAdmissionSearch($event)"
-            placeholder="Search by name, class, course, phone, city, or status"
-            type="search"
-          />
+          <div class="admin-shell__search-field">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+            <input
+              class="admin-shell__search"
+              [ngModel]="admissionSearch"
+              (ngModelChange)="setAdmissionSearch($event)"
+              placeholder="Search by name, class, course, phone, city, or status"
+              type="search"
+            />
+          </div>
         </div>
 
         @if (paginatedAdmissionLogs.length) {
@@ -531,9 +683,9 @@
                 </div>
 
                 <div class="admin-shell__log-meta">
-                  <span>{{ log.phone }}</span>
-                  <span>{{ log.city }}, {{ log.state }}</span>
-                  <span>{{ formatDate(log.createdAt) }}</span>
+                  <span><i class="fa-solid fa-phone" aria-hidden="true"></i>{{ log.phone }}</span>
+                  <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>{{ log.city }}, {{ log.state }}</span>
+                  <span><i class="fa-regular fa-calendar" aria-hidden="true"></i>{{ formatDate(log.createdAt) }}</span>
                 </div>
 
                 <div class="admin-shell__icon-actions">
@@ -574,18 +726,26 @@
     @if (selectedSection === 'contacts') {
       <section class="admin-shell__card">
         <div class="admin-shell__card-head">
-          <h3>Contact Log</h3>
-          <p>Every contact enquiry submitted from the website appears here in reverse chronological order.</p>
+          <div class="admin-shell__card-title">
+            <span class="admin-shell__card-icon"><i class="fa-solid fa-address-book" aria-hidden="true"></i></span>
+            <div>
+              <h3>Contact Log</h3>
+              <p>View every contact enquiry submitted from the public website in reverse chronological order.</p>
+            </div>
+          </div>
         </div>
 
         <div class="admin-shell__toolbar">
-          <input
-            class="admin-shell__search"
-            [ngModel]="contactSearch"
-            (ngModelChange)="setContactSearch($event)"
-            placeholder="Search by student name, class, goal, or phone"
-            type="search"
-          />
+          <div class="admin-shell__search-field">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+            <input
+              class="admin-shell__search"
+              [ngModel]="contactSearch"
+              (ngModelChange)="setContactSearch($event)"
+              placeholder="Search by student name, class, goal, or phone"
+              type="search"
+            />
+          </div>
         </div>
 
         @if (paginatedContactLogs.length) {
@@ -601,8 +761,8 @@
                 </div>
 
                 <div class="admin-shell__log-meta">
-                  <span>{{ log.phone }}</span>
-                  <span>{{ formatDate(log.createdAt) }}</span>
+                  <span><i class="fa-solid fa-phone" aria-hidden="true"></i>{{ log.phone }}</span>
+                  <span><i class="fa-regular fa-calendar" aria-hidden="true"></i>{{ formatDate(log.createdAt) }}</span>
                 </div>
 
                 <div class="admin-shell__icon-actions">
@@ -638,20 +798,33 @@
     }
 
     @if (selectedSection === 'management') {
-      <section class="admin-shell__content-grid">
+      <section class="admin-shell__content-grid admin-shell__content-grid--management">
         <article class="admin-shell__card">
           <div class="admin-shell__card-head">
-            <h3>Backup and Export</h3>
-            <p>Download the current Firestore content document as a JSON backup.</p>
+            <div class="admin-shell__card-title">
+              <span class="admin-shell__card-icon"><i class="fa-solid fa-file-export" aria-hidden="true"></i></span>
+              <div>
+                <h3>Backup and Export</h3>
+                <p>Download the current content dataset as a JSON backup.</p>
+              </div>
+            </div>
           </div>
 
-          <button class="admin-shell__action admin-shell__action--accent" type="button" (click)="downloadExport()">Download JSON Backup</button>
+          <button class="admin-shell__action admin-shell__action--accent" type="button" (click)="downloadExport()">
+            <i class="fa-solid fa-download" aria-hidden="true"></i>
+            <span>Download JSON Backup</span>
+          </button>
         </article>
 
         <article class="admin-shell__card">
           <div class="admin-shell__card-head">
-            <h3>Import from File</h3>
-            <p>Upload a JSON backup to replace the current Firestore content tree.</p>
+            <div class="admin-shell__card-title">
+              <span class="admin-shell__card-icon"><i class="fa-solid fa-file-import" aria-hidden="true"></i></span>
+              <div>
+                <h3>Import from File</h3>
+                <p>Upload a JSON backup to replace the current content dataset.</p>
+              </div>
+            </div>
           </div>
 
           <input accept="application/json" type="file" (change)="handleImportFile($event)" />
@@ -659,39 +832,56 @@
 
         <article class="admin-shell__card admin-shell__card--wide">
           <div class="admin-shell__card-head">
-            <h3>Import from JSON</h3>
-            <p>Paste a content payload directly and apply it to the website.</p>
+            <div class="admin-shell__card-title">
+              <span class="admin-shell__card-icon"><i class="fa-solid fa-code" aria-hidden="true"></i></span>
+              <div>
+                <h3>Import from JSON</h3>
+                <p>Paste a content payload directly and apply it to the website.</p>
+              </div>
+            </div>
           </div>
 
           <textarea [(ngModel)]="importPayload" rows="10"></textarea>
           <button class="admin-shell__action admin-shell__action--dark" type="button" (click)="importFromTextarea()">
-            Apply JSON Payload
+            <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+            <span>Apply JSON Payload</span>
           </button>
         </article>
 
         <article class="admin-shell__card">
           <div class="admin-shell__card-head">
-            <h3>Restore Seeded Content</h3>
-            <p>Reset all page content and settings to the default content dataset.</p>
+            <div class="admin-shell__card-title">
+              <span class="admin-shell__card-icon"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i></span>
+              <div>
+                <h3>Restore Seeded Content</h3>
+                <p>Reset all page content and settings to the default seeded dataset.</p>
+              </div>
+            </div>
           </div>
 
           <button class="admin-shell__action admin-shell__action--light" type="button" (click)="resetSiteContent()">
-            Restore Defaults
+            <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
+            <span>Restore Defaults</span>
           </button>
         </article>
 
         <article class="admin-shell__card">
           <div class="admin-shell__card-head">
-            <h3>Firebase Status</h3>
-            <p>Live collections currently tracked by this admin workspace.</p>
+            <div class="admin-shell__card-title">
+              <span class="admin-shell__card-icon"><i class="fa-solid fa-server" aria-hidden="true"></i></span>
+              <div>
+                <h3>Data Status</h3>
+                <p>Collections and storage paths currently tracked by this admin workspace.</p>
+              </div>
+            </div>
           </div>
 
           <ul class="admin-shell__bullet-list">
-            <li>Content document: `siteContent/main`</li>
-            <li>Media collection: `mediaLibrary` + Firebase Storage objects</li>
-            <li>Blog posts: `blogPosts`</li>
-            <li>Admission logs: `admissionLogs`</li>
-            <li>Contact logs: `contactLogs`</li>
+            <li><strong>Content:</strong> <code>siteContent/main</code></li>
+            <li><strong>Media:</strong> <code>mediaLibrary</code> and storage files</li>
+            <li><strong>Blogs:</strong> <code>blogPosts</code></li>
+            <li><strong>Admissions:</strong> <code>admissionLogs</code></li>
+            <li><strong>Contacts:</strong> <code>contactLogs</code></li>
           </ul>
         </article>
       </section>
@@ -712,19 +902,26 @@
 
         <div class="admin-modal__actions">
           <button type="button" class="admin-shell__action admin-shell__action--accent" (click)="uploadAndSelectDialogMedia()">
-            Upload New
+            <i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>
+            <span>Upload New</span>
           </button>
-          <button type="button" class="admin-shell__action admin-shell__action--light" (click)="closeMediaDialog()">Close</button>
+          <button type="button" class="admin-shell__action admin-shell__action--light" (click)="closeMediaDialog()">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            <span>Close</span>
+          </button>
         </div>
       </div>
 
-      <input
-        class="admin-shell__search"
-        [ngModel]="mediaPickerSearch"
-        (ngModelChange)="setMediaPickerSearch($event)"
-        placeholder="Search current media library"
-        type="search"
-      />
+      <div class="admin-shell__search-field">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <input
+          class="admin-shell__search"
+          [ngModel]="mediaPickerSearch"
+          (ngModelChange)="setMediaPickerSearch($event)"
+          placeholder="Search current media library"
+          type="search"
+        />
+      </div>
 
       @if (dialogMediaAssets.length) {
         <div class="admin-shell__record-grid">
@@ -749,8 +946,14 @@
               </div>
 
               <div class="admin-shell__dialog-actions">
-                <button type="button" class="admin-shell__action admin-shell__action--light" (click)="openMediaViewer(asset)">View</button>
-                <button type="button" class="admin-shell__action admin-shell__action--accent" (click)="selectDialogMedia(asset)">Use This</button>
+                <button type="button" class="admin-shell__action admin-shell__action--light" (click)="openMediaViewer(asset)">
+                  <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                  <span>View</span>
+                </button>
+                <button type="button" class="admin-shell__action admin-shell__action--accent" (click)="selectDialogMedia(asset)">
+                  <i class="fa-solid fa-check" aria-hidden="true"></i>
+                  <span>Use This</span>
+                </button>
               </div>
             </article>
           }
@@ -782,7 +985,10 @@
             <span>{{ modal.asset.kind }} • {{ formatFileSize(modal.asset.size) }} • {{ formatDate(modal.asset.updatedAt) }}</span>
           </div>
 
-          <button type="button" class="admin-shell__action admin-shell__action--light" (click)="closeModal()">Close</button>
+          <button type="button" class="admin-shell__action admin-shell__action--light" (click)="closeModal()">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            <span>Close</span>
+          </button>
         </div>
 
         @if (isPreviewableImage(modal.asset)) {
@@ -793,7 +999,10 @@
           <div class="admin-modal__fallback">
             <i class="fa-regular fa-file-lines" aria-hidden="true"></i>
             <p>This file cannot be previewed inline.</p>
-            <a class="admin-shell__action admin-shell__action--accent" [href]="modal.asset.url" rel="noreferrer" target="_blank">Open File</a>
+            <a class="admin-shell__action admin-shell__action--accent" [href]="modal.asset.url" rel="noreferrer" target="_blank">
+              <i class="fa-solid fa-up-right-from-square" aria-hidden="true"></i>
+              <span>Open File</span>
+            </a>
           </div>
         }
       </section>
@@ -808,7 +1017,10 @@
             <span>{{ modal.post.authorName || 'TheLearningLabs Editorial Desk' }} • {{ formatDate(modal.post.publishedAt || modal.post.createdAt) }}</span>
           </div>
 
-          <button type="button" class="admin-shell__action admin-shell__action--light" (click)="closeModal()">Close</button>
+          <button type="button" class="admin-shell__action admin-shell__action--light" (click)="closeModal()">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            <span>Close</span>
+          </button>
         </div>
 
         @if (modal.post.coverImageSrc) {
@@ -835,9 +1047,13 @@
 
           <div class="admin-modal__actions">
             <button type="button" class="admin-shell__action admin-shell__action--accent" (click)="saveBlogEdit()">
-              {{ isSavingBlog ? 'Saving...' : 'Save Blog' }}
+              <i class="fa-regular fa-floppy-disk" aria-hidden="true"></i>
+              <span>{{ isSavingBlog ? 'Saving...' : 'Save Blog' }}</span>
             </button>
-            <button type="button" class="admin-shell__action admin-shell__action--light" (click)="closeModal()">Cancel</button>
+            <button type="button" class="admin-shell__action admin-shell__action--light" (click)="closeModal()">
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+              <span>Cancel</span>
+            </button>
           </div>
         </div>
 
@@ -869,9 +1085,18 @@
             <span>Cover Image URL</span>
             <input [(ngModel)]="blogEditDraft.coverImageSrc" name="blogCoverImageSrc" type="url" />
             <div class="admin-shell__blog-media-actions">
-              <button class="admin-shell__action admin-shell__action--light" type="button" (click)="chooseBlogCoverFromLibrary()">Library</button>
-              <button class="admin-shell__action admin-shell__action--light" type="button" (click)="uploadBlogCover()">Upload</button>
-              <button class="admin-shell__action admin-shell__action--light" type="button" (click)="replaceBlogCover()">Replace</button>
+              <button class="admin-shell__action admin-shell__action--light" type="button" (click)="chooseBlogCoverFromLibrary()">
+                <i class="fa-regular fa-images" aria-hidden="true"></i>
+                <span>Library</span>
+              </button>
+              <button class="admin-shell__action admin-shell__action--light" type="button" (click)="uploadBlogCover()">
+                <i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>
+                <span>Upload</span>
+              </button>
+              <button class="admin-shell__action admin-shell__action--light" type="button" (click)="replaceBlogCover()">
+                <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+                <span>Replace</span>
+              </button>
             </div>
           </label>
 
@@ -908,7 +1133,10 @@
             <span>{{ formatDate(modal.log.createdAt) }}</span>
           </div>
 
-          <button type="button" class="admin-shell__action admin-shell__action--light" (click)="closeModal()">Close</button>
+          <button type="button" class="admin-shell__action admin-shell__action--light" (click)="closeModal()">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            <span>Close</span>
+          </button>
         </div>
 
         <div class="admin-modal__detail-grid">
@@ -935,9 +1163,13 @@
 
           <div class="admin-modal__actions">
             <button type="button" class="admin-shell__action admin-shell__action--accent" (click)="saveAdmissionEdit()">
-              {{ isSavingAdmission ? 'Saving...' : 'Save' }}
+              <i class="fa-regular fa-floppy-disk" aria-hidden="true"></i>
+              <span>{{ isSavingAdmission ? 'Saving...' : 'Save' }}</span>
             </button>
-            <button type="button" class="admin-shell__action admin-shell__action--light" (click)="closeModal()">Cancel</button>
+            <button type="button" class="admin-shell__action admin-shell__action--light" (click)="closeModal()">
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+              <span>Cancel</span>
+            </button>
           </div>
         </div>
 
@@ -999,7 +1231,10 @@
             <span>{{ formatDate(modal.log.createdAt) }}</span>
           </div>
 
-          <button type="button" class="admin-shell__action admin-shell__action--light" (click)="closeModal()">Close</button>
+          <button type="button" class="admin-shell__action admin-shell__action--light" (click)="closeModal()">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            <span>Close</span>
+          </button>
         </div>
 
         <div class="admin-modal__detail-grid">
